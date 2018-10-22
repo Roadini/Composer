@@ -1,0 +1,37 @@
+[
+ {"username" : "Tiago Ramalho",
+  "location" : "Croacia",
+  "description" : "Esta viagem foi muito fixe",
+  "postId" : "1",
+  "ownerId" : "1",
+  "urlImage" : "https://scontent.flis7-1.fna.fbcdn.net/v/t1.0-9/20258438_1893652067570862_4019107659665964412_n.jpg?_nc_cat=111&oh=b69b337a86923445d87ed7b445acd224&oe=5C4F4156"
+ },
+ {"username" : "Luís Silva",
+  "location" : "Belgica",
+  "description" : "Esta viagem foi muito fixe",
+  "postId" : "1",
+  "ownerId" : "2",
+  "urlImage" : "https://scontent.flis7-1.fna.fbcdn.net/v/t31.0-8/23735995_1674280279312175_7527285910664902411_o.jpg?_nc_cat=100&oh=52a827ec4e8488cf3664c944853e0d1c&oe=5C4C4ADB"
+ },
+ {"username" : "Gabriel Patricio",
+  "location" : "Polonia",
+  "description" : "Esta viagem foi muito fixe",
+  "postId" : "1",
+  "ownerId" : "3",
+  "urlImage" : "https://scontent.flis7-1.fna.fbcdn.net/v/t1.0-9/30704992_2064972400209417_7976331465782303438_n.jpg?_nc_cat=101&oh=d62ded4f227fa49a989e00504ddcf113&oe=5C1A136A"
+ },
+ {"username" : "Joao Branquinho",
+  "location" : "Italia",
+  "description" : "Esta viagem foi muito fixe",
+  "postId" : "1",
+  "ownerId" : "4",
+  "urlImage" : "https://scontent.flis7-1.fna.fbcdn.net/v/t1.0-9/31961250_2154421264585360_6076543030578380800_n.jpg?_nc_cat=101&oh=dfee87e635c8789ebb190fcc25ad482a&oe=5C529A05"
+ },
+ {"username" : "Joao Maia",
+  "location" : "França",
+  "description" : "Esta viagem foi muito fixe",
+  "postId" : "1",
+  "ownerId" : "5",
+  "urlImage" : "https://scontent.flis7-1.fna.fbcdn.net/v/t1.0-9/38439945_975142589342211_1081673812551925760_o.jpg?_nc_cat=105&oh=148dd270e3e1d28c578f73b39ce712c0&oe=5C49AF1B"
+ }
+]

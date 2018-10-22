@@ -1,5 +1,9 @@
-# roadini
+# roadiniApp
 
-Roadini apllication.
+Roadini apllication developed in Flutter
+
+# roadiniServer
+
+Server in Django rest framework
 
 ## Getting Started
