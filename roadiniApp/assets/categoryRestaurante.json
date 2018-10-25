@@ -1,0 +1,23 @@
+[
+  {"categoryName" : "Restaurante",
+    "categoryId" : "1",
+    "placeName" : "5 Bicas",
+    "placeId" : "23",
+    "placeDescription" : "padaria para um bom pequeno almoco",
+    "urlImage" : "https://s3-media4.fl.yelpcdn.com/bphoto/6h7O_RUilybh4pubrmgNPg/ls.jpg"
+  },
+  {"categoryName" : "Restaurante",
+    "categoryId" : "1",
+    "placeName" : "espeto do sul",
+    "placeId" : "99",
+    "placeDescription" : "Restaurante de rodizio",
+    "urlImage" : "https://img.stpu.com.br/?img=https://s3.amazonaws.com/pu-mgr/default/a0RG000000mhdNDMAY/56af6060e4b07701c0ea312e.jpg&w=620&h=400"
+  },
+  {"categoryName" : "Restaurante",
+    "categoryId" : "1",
+    "placeName" : "Culpa da vontade",
+    "placeId" : "28",
+    "placeDescription" : "hamburgaria em esgueira",
+    "urlImage" : "https://media-cdn.tripadvisor.com/media/photo-s/08/15/16/81/culpa-da-vontade.jpg"
+  }
+]

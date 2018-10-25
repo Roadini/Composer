@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:roadini/pages/codePhotos.dart';
 
 class PersonalLists extends StatefulWidget{
-
-
   const PersonalLists(
       { this.listName,
         this.listId,
@@ -100,7 +97,7 @@ class _PersonalLists extends State<PersonalLists> {
               ],
             ),
           ),
-          placeImages()
+          PlaceImages()
         ],
       );
 
@@ -154,12 +151,12 @@ class _PersonalLists extends State<PersonalLists> {
     }
   }
 }
-class placeImages extends StatefulWidget{
+class PlaceImages extends StatefulWidget{
 
-  _placeImages createState() => new _placeImages();
+  _PlaceImages createState() => new _PlaceImages();
 
 }
-class _placeImages extends State<placeImages>{
+class _PlaceImages extends State<PlaceImages>{
   clickedImage(BuildContext context) {
     Navigator.of(context)
         .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
@@ -186,7 +183,7 @@ class _placeImages extends State<placeImages>{
   Widget build(BuildContext context) {
     return new GridView.count(
       crossAxisCount: 3,childAspectRatio: 1.0,
-//                    padding: const EdgeInsets.all(0.5),
+      padding: const EdgeInsets.all(0.5),
       mainAxisSpacing: 1.5,
       crossAxisSpacing: 1.5,
       shrinkWrap: true,
@@ -197,6 +194,18 @@ class _placeImages extends State<placeImages>{
             child: new Image.network("https://media-cdn.tripadvisor.com/media/photo-s/0a/a5/5a/1c/enchanting-views-of-the.jpg", fit: BoxFit.cover)
         ),
 
+        new GestureDetector(
+            onTap: () => clickedImage(context),
+            child: new Image.network("https://i.pinimg.com/originals/af/a7/69/afa7690e09c86f4ff00cd214d3ef3f5b.jpg", fit: BoxFit.cover)
+        ),
+        new GestureDetector(
+            onTap: () => clickedImage(context),
+            child: new Image.network("https://media-cdn.tripadvisor.com/media/photo-s/0a/a5/5a/1c/enchanting-views-of-the.jpg", fit: BoxFit.cover)
+        ),
+        new GestureDetector(
+            onTap: () => clickedImage(context),
+            child: new Image.network("https://i.pinimg.com/originals/af/a7/69/afa7690e09c86f4ff00cd214d3ef3f5b.jpg", fit: BoxFit.cover)
+        ),
       ],
     );
   }
