@@ -137,18 +137,8 @@ class _ProfilePage extends State<ProfilePage> {
     }else{
       return new Column(
         children: <Widget>[
-          
-          new Center(
-              child: new Text("Your list of places:",
-                  style: new TextStyle(
-                      color: Color.fromRGBO(43, 65, 65, 1.0),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0
-                  )
-              ),
-          )
-          ,PersonalLists()],
-        //children: personalListsPlaces,
+          PersonalLists(),
+        ],
       );
     }
 

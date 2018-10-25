@@ -18,16 +18,17 @@ class _UploadPage extends State<UploadPage>{
 
   @override
   void initState() {
-    if(prompted == false){
+    /*if(prompted == false){
       _dialogOptions();
       setState(() {
         prompted = true;
       });
 
-    }
+    }*/
     super.initState();
   }
   _dialogOptions() async {
+    prompted = true;
     return showDialog(
         context: context,
         barrierDismissible: false,
@@ -76,7 +77,7 @@ class _UploadPage extends State<UploadPage>{
     return file == null
         ? new Column(children: <Widget>[
       new PersonHeader(),
-      //new IconButton(icon: new Icon(Icons.file_upload), onPressed: _dialogOptions),
+      new IconButton(icon: new Icon(Icons.file_upload), onPressed: _dialogOptions),
 
     ],)
         : new Scaffold(
