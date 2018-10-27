@@ -9,7 +9,10 @@ class PlanRoutePage extends StatefulWidget{
   _PlanRoutePage createState() => _PlanRoutePage();
 }
 class _PlanRoutePage extends State<PlanRoutePage>{
+
+  List<PlanRoute> listChoices;
   List<PlanRoute> listPlan;
+  PlanRoute editElement;
   @override
   void initState() {
     super.initState();
@@ -24,6 +27,134 @@ class _PlanRoutePage extends State<PlanRoutePage>{
 
     });
     return;
+  }
+
+  Future<Null> _refresh2() async{
+
+    await _getListCategory() ;
+
+    setState(() {
+
+    });
+    return;
+  }
+  _getChoices(BuildContext context, element){
+    editElement = element;
+    _getListCategory();
+
+    Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
+      return new Center(
+        child: new Scaffold(
+          appBar: AppBar(title: Center(child: Text("RoadIni"))),
+          body: new RefreshIndicator(child: clickedImage(), onRefresh: _refresh2),
+        ),
+      );
+    }));
+
+  }
+  clickedImage() {
+    print(editElement);
+    if(listChoices != null) {
+      return new ListView(
+          children: <Widget>[
+            new Container(
+              padding: EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
+                    child: Text("Select a new " + editElement.categoryName,
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromRGBO(43, 65, 65, 1.0)
+                      ) ,
+                    )
+                )],
+              ),),
+            new Column(children: _iterateOverChoices()),
+          ]
+      );
+
+    }
+    else{
+      return new ListView(
+          children: <Widget>[
+            PersonHeader(),
+            new Container(
+                alignment: FractionalOffset.center,
+                child: new CircularProgressIndicator()
+            )
+          ]
+      );
+    }
+  }
+  _iterateOverChoices(){
+    List<Widget> list = new List<Widget>();
+    for(var i = 0; i < listChoices.length; i++){
+      list.add(
+        new GestureDetector(
+            child: new Card(
+                elevation: 1.7,
+                child: new Padding(padding: new EdgeInsets.all(10.0),
+                  child: new Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          new Expanded(
+                            child: new Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: <Widget>[
+                                new Container(
+                                  child: new Text(listChoices[i].placeName,
+                                    style: new TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromRGBO(43, 65, 65, 1.0),
+                                    ),
+                                  ),
+                                  height: 40.0,
+                                ),
+                                new Container(
+                                  child: new Text(listChoices[i].placeDescription,
+                                    style: new TextStyle(),
+                                  ),
+                                  height: 120.0,
+                                ),
+                              ],
+                            ),
+                          ),
+                          new Expanded(
+                            child: new Container(
+                              padding: new EdgeInsets.fromLTRB(160.0, 80.0, 0.0, 80.0),
+                              decoration: new BoxDecoration(
+                                image: new DecorationImage(
+                                    image: new NetworkImage(listChoices[i].urlImage),
+                                    fit: BoxFit.cover
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                ,)
+            ),
+            onTap: () => _handleChoice(listChoices[i]),
+        )
+      );
+    }
+    return list;
+  }
+  _handleChoice(choice){
+    listPlan[listPlan.indexOf(editElement)] = choice;
+    Navigator.of(context).pop();
   }
   _iterateOverList(){
     List<Widget> list = new List<Widget>();
@@ -54,14 +185,14 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                       child : new Container(
                         child: Row(children: <Widget>[
                           new Padding(padding: new EdgeInsets.fromLTRB(0.0, 5.0, 15.0, 0.0),
-                            child: new GestureDetector(
-                              child: const Icon(
-                                Icons.edit,
-                                size: 25.0,
-                                color: Color.fromRGBO(90, 113, 113, 1.0),
-                              ),
-                              onTap: () => _changeCategory(listPlan[i]),
-                            ),
+                              child : new GestureDetector(
+                                  child: const Icon(
+                                    Icons.edit,
+                                    size: 25.0,
+                                    color: Color.fromRGBO(90, 113, 113, 1.0),
+                                  ),
+                                  onTap: () => _getChoices(context, listPlan[i])
+                              )
                           ),
                           new Padding(padding: new EdgeInsets.fromLTRB(0.0, 5.0, 15.0, 0.0),
                             child : new GestureDetector(
@@ -117,11 +248,38 @@ class _PlanRoutePage extends State<PlanRoutePage>{
 
     });
   }
-  _changeCategory(element){
-    int idx = listPlan.indexOf(element);
-    print(idx);
-    print(element.categoryId);
+  _getListCategory ()async{
+    print(editElement.categoryId + " fazer pedido desta categoria");
+    String result ="";
+    List<PlanRoute> tmpListCategory;
 
+
+    try {
+      String jsonString = await _loadJsonAsset('assets/categoryRestaurant.json');
+      var jsonResponse = jsonDecode(jsonString);
+      print(jsonResponse);
+
+      tmpListCategory = _generatePlan(jsonResponse);
+
+      /*var request = await httpClient.getUrl(Uri.parse(url));
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.OK) {
+        String json = await response.transform(utf8.decoder).join();
+        prefs.setString("feed", json);
+        List<Map<String, dynamic>> data =
+        jsonDecode(json).cast<Map<String, dynamic>>();
+        listOfPosts = _generateFeed(data);
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }*/
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
+    print(result);
+    setState(() {
+      listChoices = tmpListCategory;
+    });
   }
   _buildPlan(){
     if(listPlan != null){
@@ -168,7 +326,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     String result ="";
     List<PlanRoute> tmpListPlan;
     try {
-      String jsonString = await _loadJsonAsset();
+      String jsonString = await _loadJsonAsset('assets/planRoute.json');
       var jsonResponse = jsonDecode(jsonString);
       print(jsonResponse);
 
@@ -202,8 +360,8 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     return listPlans;
 
   }
-  Future<String> _loadJsonAsset() async{
-    return await rootBundle.loadString('assets/planRoute.json');
+  Future<String> _loadJsonAsset(jsonLoad) async{
+    return await rootBundle.loadString(jsonLoad);
   }
 
   @override
@@ -213,4 +371,42 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     );
   }
 }
+/*class Choice {
+  const Choice({this.title, this.icon});
 
+  final String title;
+  final IconData icon;
+}
+
+const List<Choice> choices = const <Choice>[
+  const Choice(title: 'Car', icon: Icons.directions_car),
+  const Choice(title: 'Bicycle', icon: Icons.directions_bike),
+  const Choice(title: 'Boat', icon: Icons.directions_boat),
+  const Choice(title: 'Bus', icon: Icons.directions_bus),
+  const Choice(title: 'Train', icon: Icons.directions_railway),
+  const Choice(title: 'Walk', icon: Icons.directions_walk),
+];
+
+class ChoiceCard extends StatelessWidget {
+  const ChoiceCard({Key key, this.choice}) : super(key: key);
+
+  final Choice choice;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle textStyle = Theme.of(context).textTheme.display1;
+    return Card(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(choice.icon, size: 128.0, color: textStyle.color),
+            Text(choice.title, style: textStyle),
+          ],
+        ),
+      ),
+    );
+  }
+}*/

@@ -68,8 +68,8 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
                         new Container(
                           child: new Text("@ Croacia",
                             style: new TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromRGBO(43, 65, 65, 1.0),
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(43, 65, 65, 1.0),
                             ),
                           ),
                           height: 40.0,
