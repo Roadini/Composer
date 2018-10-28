@@ -47,13 +47,13 @@ class _PlanRoutePage extends State<PlanRoutePage>{
       return new Center(
         child: new Scaffold(
           appBar: AppBar(title: Center(child: Text("RoadIni"))),
-          body: new RefreshIndicator(child: clickedImage(), onRefresh: _refresh2),
+          body: new RefreshIndicator(child: _clickedElementEdit(), onRefresh: _refresh2),
         ),
       );
     }));
 
   }
-  clickedImage() {
+  _clickedElementEdit() {
     print(editElement);
     if(listChoices != null) {
       return new ListView(
@@ -63,17 +63,17 @@ class _PlanRoutePage extends State<PlanRoutePage>{
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                Container(
-                    padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
-                    child: Text("Select a new " + editElement.categoryName,
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromRGBO(43, 65, 65, 1.0)
-                      ) ,
-                    )
-                )],
+                  Container(
+                      padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
+                      child: Text("Select a new " + editElement.categoryName,
+                        style: TextStyle(
+                            fontFamily: 'Roboto',
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(43, 65, 65, 1.0)
+                        ) ,
+                      )
+                  )],
               ),),
             new Column(children: _iterateOverChoices()),
           ]
@@ -96,7 +96,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     List<Widget> list = new List<Widget>();
     for(var i = 0; i < listChoices.length; i++){
       list.add(
-        new GestureDetector(
+          new GestureDetector(
             child: new Card(
                 elevation: 1.7,
                 child: new Padding(padding: new EdgeInsets.all(10.0),
@@ -144,10 +144,10 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                       ),
                     ],
                   )
-                ,)
+                  ,)
             ),
             onTap: () => _handleChoice(listChoices[i]),
-        )
+          )
       );
     }
     return list;
@@ -156,6 +156,47 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     listPlan[listPlan.indexOf(editElement)] = choice;
     Navigator.of(context).pop();
   }
+
+  _clickedItem(BuildContext context, element){
+    Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
+      return new Center(
+          child: new Scaffold(
+              appBar: AppBar(title: Center(child: Text("RoadIni"))),
+              body:new ListView(
+                  children: <Widget>[
+                    new Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                              padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
+                              child: Text(element.placeName,
+                                style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromRGBO(43, 65, 65, 1.0)
+                                ) ,
+                              )
+                          )],
+                      ),),
+                    new Container(
+                        child: Image.network(element.urlImage)
+                    ),
+                    new Padding(padding: new EdgeInsets.all(10.0),
+                      child: new Text(element.placeDescription),
+                    )
+                  ]
+              )
+          )
+      );
+    })
+    );
+
+  }
+
   _iterateOverList(){
     List<Widget> list = new List<Widget>();
     for(var i = 0; i < listPlan.length; i++){
@@ -185,6 +226,16 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                       child : new Container(
                         child: Row(children: <Widget>[
                           new Padding(padding: new EdgeInsets.fromLTRB(0.0, 5.0, 15.0, 0.0),
+                            child : new GestureDetector(
+                              child: const Icon(
+                                Icons.remove_red_eye,
+                                size: 25.0,
+                                color: Color.fromRGBO(90, 113, 113, 1.0),
+                              ),
+                              onTap: () => _clickedItem(context, listPlan[i]),
+                            ),
+                          ),
+                          new Padding(padding: new EdgeInsets.fromLTRB(0.0, 5.0, 15.0, 0.0),
                               child : new GestureDetector(
                                   child: const Icon(
                                     Icons.edit,
@@ -209,30 +260,34 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                     ),
                   ],),
                 Divider(),
-                new Text(listPlan[i].placeName,
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize:20.0,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(90, 113, 113, 1.0),
-                  ),
-                ),
-                listPlan[i].imageCard(),
-                new Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: new Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      new Text(listPlan[i].placeDescription,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: new TextStyle(
-                            color: Colors.black87
-                        ),
-                      )
-                    ],
-                  ),
+                new Column(
+                  children: <Widget>[
+                    new Text(listPlan[i].placeName,
+                      style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize:20.0,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(90, 113, 113, 1.0),
+                      ),
+                    ),
+                    listPlan[i].imageCard(),
+                    new Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: new Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text(listPlan[i].placeDescription,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 3,
+                            style: new TextStyle(
+                                color: Colors.black87
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -371,42 +426,3 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     );
   }
 }
-/*class Choice {
-  const Choice({this.title, this.icon});
-
-  final String title;
-  final IconData icon;
-}
-
-const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Car', icon: Icons.directions_car),
-  const Choice(title: 'Bicycle', icon: Icons.directions_bike),
-  const Choice(title: 'Boat', icon: Icons.directions_boat),
-  const Choice(title: 'Bus', icon: Icons.directions_bus),
-  const Choice(title: 'Train', icon: Icons.directions_railway),
-  const Choice(title: 'Walk', icon: Icons.directions_walk),
-];
-
-class ChoiceCard extends StatelessWidget {
-  const ChoiceCard({Key key, this.choice}) : super(key: key);
-
-  final Choice choice;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).textTheme.display1;
-    return Card(
-      color: Colors.white,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Icon(choice.icon, size: 128.0, color: textStyle.color),
-            Text(choice.title, style: textStyle),
-          ],
-        ),
-      ),
-    );
-  }
-}*/
