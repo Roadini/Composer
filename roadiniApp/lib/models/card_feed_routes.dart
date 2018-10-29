@@ -47,10 +47,12 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
         .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
       return new Center(
           child: new Scaffold(
-              appBar: AppBar(title: Center(child: Text("RoadIni"))),
+              appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: Center(child: Text(element.location))),
               body:new ListView(
                   children: <Widget>[
-                    new Container(
+                    /*new Container(
                       padding: EdgeInsets.all(10.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +68,7 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
                                 ) ,
                               )
                           )],
-                      ),),
+                      ),),*/
                     new Container(
                         child: Image.network(element.urlImage)
                     ),
@@ -165,19 +167,19 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
                           new Align(
                             alignment: Alignment.centerLeft,
                             child: new Container(
-                             child : new Row(
+                              child : new Row(
                                 children: <Widget>[
                                   new Padding(
-                                    padding: EdgeInsets.only(left: 0.0),
-                                    child: new GestureDetector(
-                                      child: const Icon(
-                                        Icons.remove_red_eye,
-                                        size: 25.0,
-                                        color: Color.fromRGBO(43, 65, 65, 1.0),
-                                      ),
-                                      onTap: () => _clickedItem(context, snapshot.data[i]),
+                                      padding: EdgeInsets.only(left: 0.0),
+                                      child: new GestureDetector(
+                                        child: const Icon(
+                                          Icons.remove_red_eye,
+                                          size: 25.0,
+                                          color: Color.fromRGBO(43, 65, 65, 1.0),
+                                        ),
+                                        onTap: () => _clickedItem(context, snapshot.data[i]),
 
-                                    )
+                                      )
                                   ),
                                   new Padding(
                                     padding: EdgeInsets.only(left: 20.0),
@@ -196,7 +198,7 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
                               ),
                             ),
                           ),
-                          
+
                         ],
                       ),
                     )

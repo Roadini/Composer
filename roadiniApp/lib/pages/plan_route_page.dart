@@ -164,10 +164,12 @@ class _PlanRoutePage extends State<PlanRoutePage>{
         .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
       return new Center(
           child: new Scaffold(
-              appBar: AppBar(title: Center(child: Text("RoadIni"))),
+              appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: Center(child: Text(element.placeName))),
               body:new ListView(
                   children: <Widget>[
-                    new Container(
+                    /*new Container(
                       padding: EdgeInsets.all(10.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -183,7 +185,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                                 ) ,
                               )
                           )],
-                      ),),
+                      ),),*/
                     new Container(
                         child: Image.network(element.urlImage)
                     ),

@@ -28,7 +28,8 @@ class _PersonalLists extends State<PersonalLists> {
   final String listName;
   final String description;
   final String listId;
-  bool itemListSelected = false;
+
+  List<int>itemSelected = [];
 
   _PersonalLists({ this.listName,
     this.description,
@@ -42,23 +43,20 @@ class _PersonalLists extends State<PersonalLists> {
     );
   }
 
-  _toggleSelectItem(String listId) {
-    if (itemListSelected == false) {
-      setState(() {
-        itemListSelected = true;
-      });
-      print(listId);
-    } else {
-      setState(() {
-        itemListSelected = false;
-      });
+  _toggleSelectItem(id) {
+    if(itemSelected.indexOf(id) == -1){
+      itemSelected.add(id);
+    }else{
+      itemSelected.remove(id);
     }
+    setState(() {
+
+    });
   }
 
   _getOwnLists() async{
     String result;
     List<ListFields> feed;
-    print("GET OWN LIST");
 
     try {
       String jsonString = await _loadJsonAsset('assets/listFields.json');
@@ -81,168 +79,153 @@ class _PersonalLists extends State<PersonalLists> {
     } catch (exception) {
       result = 'Failed invoking the getFeed function. Exception: $exception';
     }
-    print("GET OWN LIST 2 2");
-    print(feed[0].listItem[0].listId);
     return feed;
 
   }
   Column _buildView() {
-    if (itemListSelected == true) {
-      return new Column(
 
-        children: <Widget>[
-          new Center(
-            child: new Text("Restaurantes in Croacia",
-                style: new TextStyle(
-                    color: Color.fromRGBO(43, 65, 65, 1.0),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0
-                )
-            ),
-          ),
-          new Container(
-            margin: const EdgeInsets.all(10.0),
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                ButtonTheme(
-                  minWidth: 200.0,
-                  child: Expanded(
-                    child: new RaisedButton(
-                        splashColor: Colors.yellow,
-                        color: Color.fromRGBO(90, 113, 113, 1.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("Restaurantes in Croacia",
-                              style: new TextStyle(color: Colors.white,
-                                  fontWeight: FontWeight.bold),),
-                            Icon(Icons.arrow_drop_down, color: Colors.yellow,)
-                          ],
-                        ),
-                        onPressed: () {
-                          _toggleSelectItem("10");
-                        }
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          placeImages()
-        ],
-      );
-    }
-    else {
-      return new Column(
-
-        children: <Widget>[
-          new Center(
-            child: new Text("Your list of places:",
-                style: new TextStyle(
-                    color: Color.fromRGBO(43, 65, 65, 1.0),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0
-                )
-            ),
-          ),
-          /*new FutureBuilder(
-        future: _getOwnLists(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (!snapshot.hasData)
-            return new Container(
-                alignment: FractionalOffset.center,
-                child: new CircularProgressIndicator());
-
-
-          print(snapshot);
-        } )
-          ,*/
-          new Container(
-            margin: const EdgeInsets.all(10.0),
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                ButtonTheme(
-                  minWidth: 200.0,
-                  child: Expanded(
-                    child: new RaisedButton(
-                        splashColor: Colors.yellow,
-                        color: Color.fromRGBO(90, 113, 113, 1.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("Restaurantes in Croacia",
-                              style: new TextStyle(color: Colors.white,
-                                  fontWeight: FontWeight.bold),),
-                            Icon(Icons.arrow_right, color: Colors.yellow,)
-                          ],
-                        ),
-                        onPressed: () {
-                          _toggleSelectItem("10");
-                        }
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-  }
-
-  placeImages() {
-    return new GridView.count(
-      crossAxisCount: 3,
-      childAspectRatio: 1.0,
-      padding: const EdgeInsets.all(0.5),
-      mainAxisSpacing: 1.5,
-      crossAxisSpacing: 1.5,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+    return new Column(
       children: <Widget>[
-        new GestureDetector(
-            onTap: () => clickedImage(context),
-            child: new Image.network(
-                "https://media-cdn.tripadvisor.com/media/photo-s/0a/a5/5a/1c/enchanting-views-of-the.jpg",
-                fit: BoxFit.cover)
+        new Center(
+          child: new Text("Your list of places:",
+              style: new TextStyle(
+                  color: Color.fromRGBO(43, 65, 65, 1.0),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0
+              )
+          ),
         ),
+        new FutureBuilder(
+            future: _getOwnLists(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (!snapshot.hasData)
+                return new Container(
+                    alignment: FractionalOffset.center,
+                    child: new CircularProgressIndicator());
 
-        new GestureDetector(
-            onTap: () => clickedImage(context),
-            child: new Image.network(
-                "https://i.pinimg.com/originals/af/a7/69/afa7690e09c86f4ff00cd214d3ef3f5b.jpg",
-                fit: BoxFit.cover)
-        ),
-        new GestureDetector(
-            onTap: () => clickedImage(context),
-            child: new Image.network(
-                "https://media.timeout.com/images/102323695/380/285/image.jpg",
-                fit: BoxFit.cover)
-        ),
+              List<Widget> list = new List<Widget>();
+              for (var i = 0; i < snapshot.data.length; i++) {
+                if(itemSelected.indexOf(snapshot.data[i].listId)!= -1){
+                  list.add(
+                      new Column(children: <Widget>[
+                        new Container(
+                          margin: const EdgeInsets.all(10.0),
+                          child: new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              ButtonTheme(
+                                minWidth: 200.0,
+                                child: Expanded(
+                                  child: new RaisedButton(
+                                      splashColor: Colors.yellow,
+                                      color: Color.fromRGBO(90, 113, 113, 1.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text(snapshot.data[i].listName,
+                                            style: new TextStyle(color: Colors.white,
+                                                fontWeight: FontWeight.bold),),
+                                          Icon(Icons.arrow_drop_down, color: Colors.yellow,)
+                                        ],
+                                      ),
+                                      onPressed: () {
+                                        _toggleSelectItem(snapshot.data[i].listId);
+                                      }
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        new GridView.count(
+                            crossAxisCount: 3,
+                            childAspectRatio: 1.0,
+                            padding: const EdgeInsets.all(0.5),
+                            mainAxisSpacing: 1.5,
+                            crossAxisSpacing: 1.5,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: _placeImages(snapshot.data[i].listItem)
+                        )
+                      ],)
+                  );
+                }
+                else{
+                  list.add(
+                      new Column(children: <Widget>[
+                        new Container(
+                          margin: const EdgeInsets.all(10.0),
+                          child: new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              ButtonTheme(
+                                minWidth: 200.0,
+                                child: Expanded(
+                                  child: new RaisedButton(
+                                      splashColor: Colors.yellow,
+                                      color: Color.fromRGBO(90, 113, 113, 1.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text(snapshot.data[i].listName,
+                                            style: new TextStyle(color: Colors.white,
+                                                fontWeight: FontWeight.bold),),
+                                          Icon(Icons.arrow_right, color: Colors.yellow,)
+                                        ],
+                                      ),
+                                      onPressed: () {
+                                        _toggleSelectItem(snapshot.data[i].listId);
+                                      }
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],)
+                  );
+
+                }
+              }
+              return new Column(children: list);
+
+            }
+        )
       ],
     );
   }
 
-  clickedImage(BuildContext context) {
+  _placeImages(listItems) {
+    List<Widget> listImages = [];
+    for(var i = 0; i <listItems.length;  i++){
+      listImages.add(
+          new GestureDetector(
+              onTap: () => _clickedImage(context, listItems[i]),
+              child: new Image.network(
+                  listItems[i].urlImage,
+                  fit: BoxFit.cover)
+          )
+      );
+    }
+    return listImages;
+  }
+
+  _clickedImage(BuildContext context, item) {
     Navigator.of(context)
         .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
       return new Center(
         child: new Scaffold(
             appBar: new AppBar(
-              title: new Text('Photo',
-                  style: new TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.white,
+                automaticallyImplyLeading: false,
+                title: Center(child: new Text(item.name))
             ),
             body: new ListView(
               children: <Widget>[
                 new Container(
                   child: Image.network(
-                      "https://media-cdn.tripadvisor.com/media/photo-s/0a/a5/5a/1c/enchanting-views-of-the.jpg"),
+                      item.urlImage),
                 ),
               ],
             )),
@@ -265,29 +248,34 @@ class _PersonalLists extends State<PersonalLists> {
 }
 class ListFields {
 
-  final String listName;
-  final int listId;
-  final String listDescription;
-  final List<ItemField> listItem;
+  String listName;
+  int listId;
+  String listDescription;
+  List<ItemField> listItem;
+  bool isSelected = false;
 
-  const ListFields({
-    this.listName,
-    this.listId,
-    this.listDescription,
-    this.listItem
-  });
+  ListFields(listName, listItem, listDescription, listId){
+
+    this.listName = listName;
+    this.listId = listId;
+    this.listDescription = listDescription;
+    this.listItem = listItem;
+    this.isSelected = false;
+
+  }
 
   factory ListFields.fromJSON(Map parsedJson){
-    List<ItemField> tmp;
+    List<ItemField> tmp = [];
     for(var postData in parsedJson['listItem']){
-      tmp.add(new ItemField.fromJSON(postData));
+      ItemField tmpItem = new ItemField.fromJSON(postData);
+      tmp.add(tmpItem);
     }
 
     return new ListFields(
-      listName: parsedJson['listName'],
-      listItem: tmp,
-      listDescription: parsedJson['listDescription'],
-      listId: parsedJson['listId'],
+      parsedJson['listName'],
+      tmp,
+      parsedJson['listDescription'],
+      parsedJson['listId'],
     );
   }
 }
