@@ -1,23 +1,23 @@
 [
-  {"categoryName" : "Restaurante",
+  {"categoryName" : "Restaurant",
     "categoryId" : "1",
-    "placeName" : "5 Bicas",
+    "placeName" : "Azur",
     "placeId" : "23",
-    "placeDescription" : "padaria para um bom pequeno almoco",
-    "urlImage" : "https://s3-media4.fl.yelpcdn.com/bphoto/6h7O_RUilybh4pubrmgNPg/ls.jpg"
+    "placeDescription" : "This superbly located newbie sits by the entrance of Buža II, and quickly went to number one on TripAdvisor in its very first season. Here you can tuck into a reasonably priced, Med-and-Asian-influenced main here – fragrant meatballs in a chicken-coconut broth, perhaps, or Adriatic prawn pouches on grilled aubergine in a red-curry-and-coconut sauce – before an afternoon's sunbathing or nightcap overlooking the waves. Starters include mussels in beer butter and chili, and Dalmatian tom yum soup.",
+    "urlImage" : "https://media.timeout.com/images/102323695/380/285/image.jpg"
   },
-  {"categoryName" : "Restaurante",
+  {"categoryName" : "Restaurant",
     "categoryId" : "1",
-    "placeName" : "espeto do sul",
+    "placeName" : "Nautika",
     "placeId" : "99",
-    "placeDescription" : "Restaurante de rodizio",
-    "urlImage" : "https://img.stpu.com.br/?img=https://s3.amazonaws.com/pu-mgr/default/a0RG000000mhdNDMAY/56af6060e4b07701c0ea312e.jpg&w=620&h=400"
+    "placeDescription" : "Dubrovnik’s most prestigious culinary spot offers two panoramic terraces of starched white-tablecloth formality. Chef Mario Bunda insists on fresh, locally-sourced ingredients – shellfish feature in dishes from the Elafiti isles such as Lopud brodet with polenta and Šipan fisherman’s carpaccio, or there are lobster medallions from Vis. Diners can also opt between three kinds of menu.",
+    "urlImage" : "https://media.timeout.com/images/102324553/380/285/image.jpg"
   },
-  {"categoryName" : "Restaurante",
+  {"categoryName" : "Restaurant",
     "categoryId" : "1",
-    "placeName" : "Culpa da vontade",
+    "placeName" : "Restaurant 360",
     "placeId" : "28",
-    "placeDescription" : "hamburgaria em esgueira",
-    "urlImage" : "https://media-cdn.tripadvisor.com/media/photo-s/08/15/16/81/culpa-da-vontade.jpg"
+    "placeDescription" : "Set within the great walls of Dubrovnik with impressive views over the port, 360 effortlessly blends its historical setting with a progressive, forward-thinking menu. Head-chef Marijo Curić has created a fantastic array of Mediterranean-spanning dishes, where the emphasis is very much on well-sourced, well-presented food influenced by the Adriatic. The menu changes constantly but 360 is particularly skilled with seafood, modern Mediterranean dishes and innovations of Croatian classics. This is upscale, sophisticated dining at its best. Without being too stuffy or formal, they pride themselves on providing a casual vibe where creative cuisine takes centre stage. ",
+    "urlImage" : "https://media.timeout.com/images/103255450/380/285/image.jpg"
   }
 ]

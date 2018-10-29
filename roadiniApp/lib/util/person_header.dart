@@ -41,7 +41,7 @@ class _PersonHeader extends State<PersonHeader>{
         children: <Widget>[_ImageHeader(),
         Container(
             padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
-            child: Text('@ Aveiro',
+            child: Text('@ Croatia',
               style: TextStyle(
                   fontFamily: 'Roboto',
                   fontSize: 20.0,

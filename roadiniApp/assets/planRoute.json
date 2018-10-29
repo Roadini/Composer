@@ -1,16 +1,16 @@
 [
-  {"categoryName" : "Restaurante",
+  {"categoryName" : "Restaurant",
     "categoryId" : "1",
-    "placeName" : "5 Bicas",
+    "placeName" : "Azur",
     "placeId" : "23",
-    "placeDescription" : "Resumo empresarial da sociedade PADARIA DAS 5 BICAS, LDA. Na conservatória do registo comercial, PADARIA DAS 5 BICAS, LDA está inscrita como LDA. O desempenho da sua atividade empresarial é de 32 anos. A atividade principal está enquadrada na atividade CINI pertencente a Panificação. Os últimos dados registados em Empresite mostram que a última revisão dos dados empresariais foi no dia 16 de julho de 2018. A localização da empresa encontra-se na cidade de UNIAO FREGUESIAS GLORIA VERA CRUZ AVEIRO, que pertence ao distrito de AVEIRO. A sede está localizada no endereço de R DE SÃO SEBASTIÃO 26, 3810-187.",
-    "urlImage" : "https://s3-media4.fl.yelpcdn.com/bphoto/6h7O_RUilybh4pubrmgNPg/ls.jpg"
+    "placeDescription" : "This superbly located newbie sits by the entrance of Buža II, and quickly went to number one on TripAdvisor in its very first season. Here you can tuck into a reasonably priced, Med-and-Asian-influenced main here – fragrant meatballs in a chicken-coconut broth, perhaps, or Adriatic prawn pouches on grilled aubergine in a red-curry-and-coconut sauce – before an afternoon's sunbathing or nightcap overlooking the waves. Starters include mussels in beer butter and chili, and Dalmatian tom yum soup.",
+    "urlImage" : "https://media.timeout.com/images/102323695/380/285/image.jpg"
   },
-  {"categoryName" : "Museu",
+  {"categoryName" : "Beaches",
     "categoryId" : "2",
-    "placeName" : "Santa joana",
+    "placeName" : "Banje Beach",
     "placeId" : "40",
-    "placeDescription" : "Museu santa joana aveiro",
-    "urlImage" : "http://www.centerofportugal.com/wp-content/uploads/2013/12/aveiro-mosteiro-jesus.jpg"
+    "placeDescription" : "Located in the extreme south coast of Croatia, Dubrovnik is one the country’s top travel destinations, in part because of the city’s many beaches. Banja Beach, located to the east of the city’s Old Town district, is particularly popular. The pebble beach is surrounded by some of Dubrovnik’s best hotels and is equipped with all the amenities that upscale travelers expect, including deck chairs, umbrellas and ranging rooms equipped with showers. The beach favored by celebrities is a great in-town spot to enjoy water sports like jet skiing and paragliding too.",
+    "urlImage" : "https://www.touropia.com/gfx/d/best-beaches-in-croatia/banje_beach.jpg?v=1"
   }
 ]

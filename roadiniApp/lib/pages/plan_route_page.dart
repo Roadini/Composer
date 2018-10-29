@@ -123,6 +123,8 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                                 new Container(
                                   child: new Text(listChoices[i].placeDescription,
                                     style: new TextStyle(),
+                                    maxLines: 6,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   height: 120.0,
                                 ),

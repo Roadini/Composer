@@ -1,0 +1,32 @@
+[
+  {"listName" : "Croatia restaurants",
+    "listId" : 1,
+    "listDescription" : "Lista de restaurantes da croacia",
+    "postId" : 1,
+    "listItem" : [
+      {"name":"Restaurante1",
+        "location" : "Croacia",
+        "description" : "bom restaurante",
+        "postId" : 1,
+        "listId" : 1,
+        "urlImage" : "https://i.pinimg.com/originals/af/a7/69/afa7690e09c86f4ff00cd214d3ef3f5b.jpg",
+        "stars" : 20
+      }
+    ]
+  },
+  {"listName" : "Croacia Praias",
+    "listId" : 2,
+    "listDescription" : "Lista de restaurantes da croacia",
+    "postId" : 1,
+    "listItem" : [
+      {"name":"Praia Split",
+        "location" : "Croacia",
+        "description" : "praia bastante calma",
+        "postId" : 1,
+        "listId" : 2,
+        "urlImage" : "https://spguia.melhoresdestinos.com.br/system/fotos_local/fotos/5419/show/bacvice.jpg",
+        "stars" : 20
+      }
+    ]
+  }
+]
