@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:roadini/models/feed_post.dart';
 import 'package:roadini/util/person_header.dart';
+import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class FeedPage extends StatefulWidget{
@@ -60,24 +62,25 @@ class _FeedPage extends State<FeedPage>{
     List<FeedPost> listPosts;
 
     try {
-      String jsonString = await _loadJsonAsset();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      /*String jsonString = await _loadJsonAsset();
       var jsonResponse = jsonDecode(jsonString);
       print(jsonResponse);
 
-      listPosts = _generateFeed(jsonResponse);
+      listPosts = _generateFeed(jsonResponse);*/
 
-      /*var request = await httpClient.getUrl(Uri.parse(url));
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/feed"));
       var response = await request.close();
-      if (response.statusCode == HttpStatus.OK) {
+      if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
-        prefs.setString("feed", json);
-        List<Map<String, dynamic>> data =
-        jsonDecode(json).cast<Map<String, dynamic>>();
-        listOfPosts = _generateFeed(data);
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse["feed"]);
+        listPosts = _generateFeed(jsonResponse["feed"]);
       } else {
         result =
         'Error getting a feed:\nHttp status ${response.statusCode}';
-      }*/
+      }
     } catch (exception) {
       result = 'Failed invoking the getFeed function. Exception: $exception';
     }

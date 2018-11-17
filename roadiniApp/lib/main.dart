@@ -3,9 +3,14 @@ import 'package:roadini/pages/plan_route_page.dart';
 import 'package:roadini/pages/feed_page.dart';
 import 'package:roadini/pages/upload_page.dart';
 import 'package:roadini/pages/profile_page.dart';
+import 'package:map_view/map_view.dart';
 
 
-void main() => runApp(new MyApp());
+void main(){
+  MapView.setApiKey(API_KEY);
+  runApp(new MyApp());
+}
+const API_KEY = ('AIzaSyAKzTjJcIZKZDs2-ZD3B1njQl2mN3Tu5l8');
 
 class MyApp extends StatelessWidget {
   @override
@@ -103,6 +108,4 @@ class _MainPage extends State<MainPage>{
     super.dispose();
     pageIndex.dispose();
   }
-
-
 }

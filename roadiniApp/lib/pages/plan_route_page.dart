@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:roadini/models/plan_route.dart';
 import 'package:roadini/util/person_header.dart';
+import 'dart:io';
 
 class PlanRoutePage extends StatefulWidget{
   _PlanRoutePage createState() => _PlanRoutePage();
@@ -46,7 +47,9 @@ class _PlanRoutePage extends State<PlanRoutePage>{
         .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
       return new Center(
         child: new Scaffold(
-          appBar: AppBar(title: Center(child: Text("RoadIni"))),
+          appBar: AppBar(
+              automaticallyImplyLeading: false,
+              title: Center(child: Text("RoadIni"))),
           body: new RefreshIndicator(child: _clickedElementEdit(), onRefresh: _refresh2),
         ),
       );
@@ -385,24 +388,24 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     String result ="";
     List<PlanRoute> tmpListPlan;
     try {
-      String jsonString = await _loadJsonAsset('assets/planRoute.json');
+      /*String jsonString = await _loadJsonAsset('assets/planRoute.json');
       var jsonResponse = jsonDecode(jsonString);
       print(jsonResponse);
 
-      tmpListPlan = _generatePlan(jsonResponse);
+      tmpListPlan = _generatePlan(jsonResponse);*/
 
-      /*var request = await httpClient.getUrl(Uri.parse(url));
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/magicRoute"));
       var response = await request.close();
-      if (response.statusCode == HttpStatus.OK) {
+      if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
-        prefs.setString("feed", json);
-        List<Map<String, dynamic>> data =
-        jsonDecode(json).cast<Map<String, dynamic>>();
-        listOfPosts = _generateFeed(data);
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse["route"]);
+        tmpListPlan = _generatePlan(jsonResponse["route"]);
       } else {
         result =
         'Error getting a feed:\nHttp status ${response.statusCode}';
-      }*/
+      }
     } catch (exception) {
       result = 'Failed invoking the getFeed function. Exception: $exception';
     }

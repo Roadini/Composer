@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:io';
 
 class CardFeedRoutes extends StatefulWidget{
 
@@ -19,23 +20,23 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
     List<FeedRoutes> feed;
 
     try {
-      String jsonString = await _loadJsonAsset('assets/personalTrips.json');
+      /*String jsonString = await _loadJsonAsset('assets/personalTrips.json');
       var jsonResponse = jsonDecode(jsonString);
 
-      feed = _generateFeedRoutes(jsonResponse);
+      feed = _generateFeedRoutes(jsonResponse);*/
 
-      /*var request = await httpClient.getUrl(Uri.parse(url));
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/personalTrips"));
       var response = await request.close();
-      if (response.statusCode == HttpStatus.OK) {
+      if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
-        prefs.setString("feed", json);
-        List<Map<String, dynamic>> data =
-        jsonDecode(json).cast<Map<String, dynamic>>();
-        listOfPosts = _generateFeed(data);
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse["trips"]);
+        feed = _generateFeedRoutes(jsonResponse["trips"]);
       } else {
         result =
         'Error getting a feed:\nHttp status ${response.statusCode}';
-      }*/
+      }
     } catch (exception) {
       result = 'Failed invoking the getFeed function. Exception: $exception';
     }
