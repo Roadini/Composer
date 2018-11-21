@@ -1,8 +1,7 @@
 [
   {"listName" : "Croatia restaurants",
     "listId" : 1,
-    "listDescription" : "Lista de restaurantes da croacia",
-    "postId" : 1,
+    "userId" : 1,
     "listItem" : [
       {"name":"Restaurante1",
         "location" : "Croacia",

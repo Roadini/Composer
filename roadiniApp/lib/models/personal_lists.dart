@@ -1,40 +1,32 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class PersonalLists extends StatefulWidget{
-  const PersonalLists(
-      { this.listName,
-        this.listId,
-        this.description,
+  const PersonalLists();
 
-      });
 
-  final String listName;
-  final String description;
-  final String listId;
-
-  _PersonalLists createState() => new _PersonalLists(
-
-    listName: this.listName,
-    listId: this.listId,
-    description: this.description,
-  );
+  _PersonalLists createState() => new _PersonalLists();
 
 }
 class _PersonalLists extends State<PersonalLists> {
 
-  final String listName;
-  final String description;
-  final String listId;
-
+  List<ListFields> listShow;
+  var _listShow;
+  TextEditingController _listName;
   List<int>itemSelected = [];
 
-  _PersonalLists({ this.listName,
-    this.description,
-    this.listId});
-
+  @override
+  initState(){
+    _listName = new TextEditingController();
+    listShow = new List();
+    _listShow = _getOwnLists();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,26 +51,24 @@ class _PersonalLists extends State<PersonalLists> {
     List<ListFields> feed;
 
     try {
-      String jsonString = await _loadJsonAsset('assets/listFields.json');
-      var jsonResponse = jsonDecode(jsonString);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      feed = _generateListFields(jsonResponse);
-
-      /*var request = await httpClient.getUrl(Uri.parse(url));
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/ownLists"));
       var response = await request.close();
-      if (response.statusCode == HttpStatus.OK) {
+      if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
-        prefs.setString("feed", json);
-        List<Map<String, dynamic>> data =
-        jsonDecode(json).cast<Map<String, dynamic>>();
-        listOfPosts = _generateFeed(data);
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse["result"]);
+        feed = _generateListFields(jsonResponse["result"]);
       } else {
         result =
         'Error getting a feed:\nHttp status ${response.statusCode}';
-      }*/
+      }
     } catch (exception) {
       result = 'Failed invoking the getFeed function. Exception: $exception';
     }
+    listShow.addAll(feed);
     return feed;
 
   }
@@ -96,7 +86,7 @@ class _PersonalLists extends State<PersonalLists> {
           ),
         ),
         new FutureBuilder(
-            future: _getOwnLists(),
+            future: _listShow,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (!snapshot.hasData)
                 return new Container(
@@ -104,8 +94,8 @@ class _PersonalLists extends State<PersonalLists> {
                     child: new CircularProgressIndicator());
 
               List<Widget> list = new List<Widget>();
-              for (var i = 0; i < snapshot.data.length; i++) {
-                if(itemSelected.indexOf(snapshot.data[i].listId)!= -1){
+              for (var i = 0; i < listShow.length; i++) {
+                if(itemSelected.indexOf(listShow[i].listId)!= -1){
                   list.add(
                       new Column(children: <Widget>[
                         new Container(
@@ -123,14 +113,14 @@ class _PersonalLists extends State<PersonalLists> {
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
-                                          Text(snapshot.data[i].listName,
+                                          Text(listShow[i].listName,
                                             style: new TextStyle(color: Colors.white,
                                                 fontWeight: FontWeight.bold),),
                                           Icon(Icons.arrow_drop_down, color: Colors.yellow,)
                                         ],
                                       ),
                                       onPressed: () {
-                                        _toggleSelectItem(snapshot.data[i].listId);
+                                        _toggleSelectItem(listShow[i].listId);
                                       }
                                   ),
                                 ),
@@ -146,7 +136,7 @@ class _PersonalLists extends State<PersonalLists> {
                             crossAxisSpacing: 1.5,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            children: _placeImages(snapshot.data[i].listItem)
+                            children: _placeImages(listShow[i].listItem)
                         )
                       ],)
                   );
@@ -169,14 +159,14 @@ class _PersonalLists extends State<PersonalLists> {
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
-                                          Text(snapshot.data[i].listName,
+                                          Text(listShow[i].listName,
                                             style: new TextStyle(color: Colors.white,
                                                 fontWeight: FontWeight.bold),),
                                           Icon(Icons.arrow_right, color: Colors.yellow,)
                                         ],
                                       ),
                                       onPressed: () {
-                                        _toggleSelectItem(snapshot.data[i].listId);
+                                        _toggleSelectItem(listShow[i].listId);
                                       }
                                   ),
                                 ),
@@ -188,13 +178,110 @@ class _PersonalLists extends State<PersonalLists> {
                   );
 
                 }
+
               }
-              return new Column(children: list);
+              return new Column(children: <Widget>[
+                new Column(
+                  children: list,
+                ),
+                new Container(
+
+                  child: new RawMaterialButton(
+                    onPressed: () {_dialogOptions();},
+                    child: new Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 35.0,
+                    ),
+                    shape: new CircleBorder(),
+                    elevation: 2.0,
+                    fillColor: Color.fromRGBO(43, 65, 65, 1.0),
+                    padding: const EdgeInsets.all(10.0),
+                  ),
+                  alignment: Alignment.bottomRight,
+                  padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                )
+
+              ]);
 
             }
         )
       ],
     );
+  }
+
+  _dialogOptions() async {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text("New List"),
+            content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              new TextField(
+                decoration: new InputDecoration(
+                    hintText: 'eg. Restaurants in Averio'),
+                controller: _listName,
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Save'),
+            onPressed: () {
+              print(_listName.text);
+              _createNewList(_listName.text);
+              _listName.text = "";
+              Navigator.pop(context);
+            },
+          ),
+          FlatButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+          );
+        }
+
+    );
+  }
+  _createNewList(String name) async{
+
+    String result;
+    ListFields newList;
+
+    try {
+      var data = {'name': name};
+      print(data.toString());
+      http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/createList", body:data);
+      print(response);
+      var json_response = jsonDecode(response.body);
+      if (response.statusCode == HttpStatus.ok) {
+        if(json_response["status"] == false){
+          print("erro, try again");
+        }else{
+          var r = json_response["result"];
+          newList = ListFields(r["list_name"], null, r["user_id"],r["id"]);
+          print("add list");
+          listShow.add(newList);
+        }
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
+    print(result);
+    setState(() {
+    });
+
+
   }
 
   _placeImages(listItems) {
@@ -250,31 +337,37 @@ class ListFields {
 
   String listName;
   int listId;
-  String listDescription;
+  int userId;
   List<ItemField> listItem;
   bool isSelected = false;
 
-  ListFields(listName, listItem, listDescription, listId){
-
+  ListFields(listName, listItem, userId, listId){
     this.listName = listName;
     this.listId = listId;
-    this.listDescription = listDescription;
-    this.listItem = listItem;
+    this.userId = userId;
+    if(listItem != null)
+      this.listItem = listItem;
+    else
+      this.listItem = new List();
     this.isSelected = false;
-
   }
 
   factory ListFields.fromJSON(Map parsedJson){
     List<ItemField> tmp = [];
-    for(var postData in parsedJson['listItem']){
-      ItemField tmpItem = new ItemField.fromJSON(postData);
-      tmp.add(tmpItem);
+    if(parsedJson['listItem'] == null){
+      tmp = new List();
+    }
+    else {
+      for (var postData in parsedJson['listItem']) {
+        ItemField tmpItem = new ItemField.fromJSON(postData);
+        tmp.add(tmpItem);
+      }
     }
 
     return new ListFields(
       parsedJson['listName'],
       tmp,
-      parsedJson['listDescription'],
+      parsedJson['userId'],
       parsedJson['listId'],
     );
   }
@@ -282,33 +375,35 @@ class ListFields {
 
 class ItemField{
 
-  const ItemField(
-      { this.name,
-        this.location,
-        this.description,
-        this.postId,
-        this.listId,
-        this.urlImage,
-        this.stars
-      });
+  ItemField.empty();
 
-  final String name;
-  final String location;
-  final String description;
-  final int postId;
-  final int listId;
-  final String urlImage;
-  final int stars;
+  ItemField(name, location, description, postId, listId, urlImage, stars) {
+    this.name = name;
+    this.location = location;
+    this.description = description;
+    this.postId = postId;
+    this.listId = listId;
+    this.urlImage = urlImage;
+    this.stars = stars;
+  }
+
+  String name;
+  String location;
+  String description;
+  int postId;
+  int listId;
+  String urlImage;
+  int stars;
 
   factory ItemField.fromJSON(Map parsedJson){
     return new ItemField(
-      name: parsedJson['name'],
-      location: parsedJson['location'],
-      postId: parsedJson['postId'],
-      listId: parsedJson['listId'],
-      description: parsedJson['description'],
-      urlImage : parsedJson['urlImage'],
-      stars: parsedJson['stars'],
+      parsedJson['name'],
+      parsedJson['location'],
+      parsedJson['postId'],
+      parsedJson['listId'],
+      parsedJson['description'],
+      parsedJson['urlImage'],
+      parsedJson['stars'],
     );
   }
 

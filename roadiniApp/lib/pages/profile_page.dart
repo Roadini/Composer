@@ -25,7 +25,6 @@ class _ProfilePage extends State<ProfilePage> {
 
 
   _getUser() async{
-   print("Entrou aqui") ;
    String result;
    ProfileFields user;
 

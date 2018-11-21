@@ -1,13 +1,16 @@
+//import 'package:roadini/util/person_header.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:map_view/map_view.dart';
-import 'package:roadini/main.dart';
-//import 'package:roadini/util/person_header.dart';
+import 'package:location/location.dart' as l;
 import 'package:map_view/figure_joint_type.dart';
+import 'package:map_view/map_view.dart';
 import 'package:map_view/polygon.dart';
 import 'package:map_view/polyline.dart';
+import 'package:roadini/main.dart';
+
 
 
 class UploadPage extends StatefulWidget{
@@ -24,9 +27,23 @@ class _UploadPage extends State<UploadPage>{
   var compositeSubscription = new CompositeSubscription();
   var staticMapProvider = new StaticMapProvider(API_KEY);
   Uri staticMapUri;
-  @override
 
+
+  Map<String, double> _currentLocation;
+  Map<String, double> _startLocation;
+
+  l.Location _location = new l.Location();
+  StreamSubscription<Map<String, double>> _locationSubscription;
+  List locations = [];
+  bool _permission = false;
+  var _future;
+  String error;
+  bool tracking = false;
+
+
+  @override
   void initState() {
+    super.initState();
     /*if(prompted == false){
       _dialogOptions();
       setState(() {
@@ -34,20 +51,64 @@ class _UploadPage extends State<UploadPage>{
       });
 
     }*/
-    cameraPosition = new CameraPosition(Locations.portland, 2.0);
-    staticMapUri = staticMapProvider.getStaticUri(Locations.portland, 12,
-        width: 900, height: 400, mapType: StaticMapViewType.roadmap);
-    super.initState();
+
+    _future = initPlatformState();
+    _locationSubscription =
+        _location.onLocationChanged().listen((Map<String,double> result) {
+          print(result);
+          _currentLocation = result;
+          locations.add(_currentLocation);
+          print(locations.length);
+          if(locations.length == 20){
+            print("new POST to server and save trancking");
+          }
+        });
   }
-  _myFunction () async {
-    mapView.onLocationUpdated.listen((location){
-      print("Location updated $location");
-      cameraPosition = new CameraPosition( new Location(location.latitude, location.longitude), 15.0);
+  toggleTracking(){
+    if(tracking)
+      _locationSubscription.pause();
+    else
+      _locationSubscription.resume();
 
+    print("toogle");
+    tracking = !tracking;
+  }
+
+  initPlatformState() async {
+    Map<String, double> location;
+
+    try {
+      _permission = await _location.hasPermission();
+      location = await _location.getLocation();
+
+
+      error = null;
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'Permission denied';
+      } else if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'Permission denied - please ask the user to enable it from the app settings';
+      }
+
+      location = null;
+    }
+
+    _startLocation = location;
+    locations.add(_startLocation);
+    cameraPosition = new CameraPosition(new Location(_startLocation["latitude"], _startLocation["longitude"]), 16.0);
+    //staticMapUri = staticMapProvider.getStaticUri(new Location(_startLocation["latitude"], _startLocation["longitude"]), 14,
+        //width: 900, height: 400, mapType: StaticMapViewType.roadmap);
+    List<Marker> t = new List();
+    Marker m = new Marker("0", "YourPosition", _startLocation["latitude"], _startLocation["longitude"]);
+    t.add(m);
+    print(t.length);
+    staticMapUri = staticMapProvider.getStaticUriWithMarkersAndZoom(t,zoomLevel : 16, width : 900,
+        height: 400, maptype: StaticMapViewType.roadmap, center: new Location(_startLocation["latitude"], _startLocation["longitude"]));
+    setState(() {
     });
-    return cameraPosition;
 
-
+    print("retuirn");
+    return location;
   }
   _dialogOptions() async {
     prompted = true;
@@ -92,24 +153,24 @@ class _UploadPage extends State<UploadPage>{
   }
   @override
   Widget build(BuildContext context) {
-    _myFunction();
     return new FutureBuilder(
-        future: _myFunction(),
+        future: _future,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData)
             return new Container(
                 alignment: FractionalOffset.center,
                 child: new CircularProgressIndicator());
-          return new Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          return new ListView(
+            //mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               new Container(
                 height: 250.0,
-                child: showMap(),
-                  /*new Stack(
+                child: //showMap(),
+                  new Stack(
                   children: <Widget>[
                     new Center(
-                        child: new Container(
+                        child:
+                        new Container(
                       child: new Text(
                         "You are supposed to see a map here.\n\nAPI Key is not valid.\n\n"
                             "To view maps in the example application set the "
@@ -128,7 +189,7 @@ class _UploadPage extends State<UploadPage>{
                       onTap: showMap,
                     )
                   ],
-                ),*/
+                ),
               ),
               new Container(
                 padding: new EdgeInsets.only(top: 10.0),
@@ -144,6 +205,11 @@ class _UploadPage extends State<UploadPage>{
                     .latitude}\n\nLng:${cameraPosition.center
                     .longitude}\n\nZoom: ${cameraPosition.zoom}"),
               ),
+              new Container(
+                child: RaisedButton(
+                  onPressed: toggleTracking,
+                ),
+              )
             ],
           );
 
@@ -151,6 +217,9 @@ class _UploadPage extends State<UploadPage>{
   }
 
   showMap() {
+    mapView.onMapReady.listen((_) {
+      print("Map ready");
+    });
     mapView.show(
         new MapOptions(
             mapViewType: MapViewType.normal,
@@ -167,6 +236,7 @@ class _UploadPage extends State<UploadPage>{
       mapView.setPolylines(_lines);
       mapView.setPolygons(_polygons);
     });
+    /*
     compositeSubscription.add(sub);
     sub = mapView.onLocationUpdated.listen((location) {
       cameraPosition = new CameraPosition( new Location(location.latitude, location.longitude), 12.0);
@@ -216,7 +286,7 @@ class _UploadPage extends State<UploadPage>{
     sub = mapView.onInfoWindowTapped.listen((marker) {
       print("Info Window Tapped for ${marker.title}");
     });
-    compositeSubscription.add(sub);
+    compositeSubscription.add(sub);*/
     //sub = mapView.onIndoorBuildingActivated.listen(
         //(indoorBuilding) => print("Activated indoor building $indoorBuilding"));
     //compositeSubscription.add(sub);
