@@ -2,15 +2,16 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:location/location.dart' as l;
 import 'package:map_view/figure_joint_type.dart';
 import 'package:map_view/map_view.dart';
 import 'package:map_view/polygon.dart';
 import 'package:map_view/polyline.dart';
 import 'package:roadini/main.dart';
-
+import 'package:roadini/models/app_location.dart';
+import 'package:roadini/models/local.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class UploadPage extends StatefulWidget{
@@ -27,23 +28,13 @@ class _UploadPage extends State<UploadPage>{
   var compositeSubscription = new CompositeSubscription();
   var staticMapProvider = new StaticMapProvider(API_KEY);
   Uri staticMapUri;
-
-
-  Map<String, double> _currentLocation;
-  Map<String, double> _startLocation;
-
-  l.Location _location = new l.Location();
-  StreamSubscription<Map<String, double>> _locationSubscription;
-  List locations = [];
-  bool _permission = false;
-  var _future;
-  String error;
-  bool tracking = false;
+  List<Local> listPlaces;
 
 
   @override
   void initState() {
     super.initState();
+    _load();
     /*if(prompted == false){
       _dialogOptions();
       setState(() {
@@ -51,64 +42,19 @@ class _UploadPage extends State<UploadPage>{
       });
 
     }*/
-
-    _future = initPlatformState();
-    _locationSubscription =
-        _location.onLocationChanged().listen((Map<String,double> result) {
-          print(result);
-          _currentLocation = result;
-          locations.add(_currentLocation);
-          print(locations.length);
-          if(locations.length == 20){
-            print("new POST to server and save trancking");
-          }
-        });
   }
-  toggleTracking(){
-    if(tracking)
-      _locationSubscription.pause();
-    else
-      _locationSubscription.resume();
+  _load() async{
 
-    print("toogle");
-    tracking = !tracking;
+    _getPlacesNear();
+
   }
-
-  initPlatformState() async {
-    Map<String, double> location;
-
-    try {
-      _permission = await _location.hasPermission();
-      location = await _location.getLocation();
-
-
-      error = null;
-    } on PlatformException catch (e) {
-      if (e.code == 'PERMISSION_DENIED') {
-        error = 'Permission denied';
-      } else if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
-        error = 'Permission denied - please ask the user to enable it from the app settings';
-      }
-
-      location = null;
-    }
-
-    _startLocation = location;
-    locations.add(_startLocation);
-    cameraPosition = new CameraPosition(new Location(_startLocation["latitude"], _startLocation["longitude"]), 16.0);
-    //staticMapUri = staticMapProvider.getStaticUri(new Location(_startLocation["latitude"], _startLocation["longitude"]), 14,
-        //width: 900, height: 400, mapType: StaticMapViewType.roadmap);
-    List<Marker> t = new List();
-    Marker m = new Marker("0", "YourPosition", _startLocation["latitude"], _startLocation["longitude"]);
-    t.add(m);
-    print(t.length);
-    staticMapUri = staticMapProvider.getStaticUriWithMarkersAndZoom(t,zoomLevel : 16, width : 900,
-        height: 400, maptype: StaticMapViewType.roadmap, center: new Location(_startLocation["latitude"], _startLocation["longitude"]));
+  initPlatformState(container){
+    cameraPosition = new CameraPosition(container.getStartLocation(), 16.0);
+    List<Marker> m = container.getMarkers();
+    staticMapUri = staticMapProvider.getStaticUriWithMarkersAndZoom(m,zoomLevel : 16, width : 900,
+        height: 400, maptype: StaticMapViewType.roadmap, center: container.getStartLocation());
     setState(() {
     });
-
-    print("retuirn");
-    return location;
   }
   _dialogOptions() async {
     prompted = true;
@@ -119,8 +65,8 @@ class _UploadPage extends State<UploadPage>{
           return new SimpleDialog(
             title: const Text("Post and Track"),
             children: <Widget>[
-              new SimpleDialogOption(
-                child: const Text("Add Post"),
+              /*new SimpleDialogOption(
+                child: const Text("Add Place to personal lists"),
                 onPressed: () async {
                   Navigator.pop(context);
                   File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -131,7 +77,7 @@ class _UploadPage extends State<UploadPage>{
 
               ),
               new SimpleDialogOption(
-                child: const Text("Discover Place"),
+                child: const Text("Marker this place"),
                 onPressed: () async {
                   Navigator.pop(context);
                   File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -140,6 +86,26 @@ class _UploadPage extends State<UploadPage>{
                   });
                 },
 
+              ),*/
+              new SimpleDialogOption(
+                child: const Text("Add new feed post"),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
+                  setState(() {
+                    file = imageFile;
+                  });
+                },
+              ),
+              new SimpleDialogOption(
+                child: const Text("Discover Monument"),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
+                  setState(() {
+                    file = imageFile;
+                  });
+                },
               )
             ],
           );
@@ -151,10 +117,126 @@ class _UploadPage extends State<UploadPage>{
 
 
   }
+  _buttonTracking(container){
+    if(!container.getTracking()){
+      return new Container(
+        child: new Column(
+          children: <Widget>[
+            new RawMaterialButton(
+              onPressed: () {container.toggle();},
+              child: new Icon(
+                Icons.play_circle_outline,
+                color: Colors.white,
+                size: 25.0,
+              ),
+              shape: new CircleBorder(),
+              elevation: 2.0,
+              fillColor: Color.fromRGBO(43, 65, 65, 1.0),
+              padding: const EdgeInsets.all(10.0),
+            ),
+            new Text("Start/Stop Tracking", style:new TextStyle(fontWeight: FontWeight.bold))
+          ],
+        ),
+        alignment: Alignment.bottomRight,
+        padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),);}
+    else{
+      return new Container(
+        child: new Column(
+          children: <Widget>[
+            new RawMaterialButton(
+              onPressed: () {container.toggle();},
+              child: new Icon(
+                Icons.pause_circle_outline,
+                color: Colors.white,
+                size: 25.0,
+              ),
+              shape: new CircleBorder(),
+              elevation: 2.0,
+              fillColor: Color.fromRGBO(43, 65, 65, 1.0),
+              padding: const EdgeInsets.all(10.0),
+            ),
+            new Text("Start/Stop Tracking", style:new TextStyle(fontWeight: FontWeight.bold))
+          ],
+        ),
+        alignment: Alignment.bottomRight,
+        padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),);
+    }
+
+  }
+  Future<Null> _refresh() async{
+
+    await _getPlacesNear() ;
+
+    setState(() {
+
+    });
+    return;
+  }
+
+  getPlacesNear(){
+    if(listPlaces != null) {
+      return new Column( children: listPlaces);
+    }else{
+      return new Column(
+        children: <Widget>[
+          new Text("Searching Places", style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          new Container(
+              alignment: FractionalOffset.center,
+              child: new CircularProgressIndicator())
+        ],
+      );
+    }
+  }
+  _getPlacesNear() async{
+
+    String result;
+    List<Local> listPlacesTmp;
+    print("_GETPLACES");
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      /*String jsonString = await _loadJsonAsset();
+      var jsonResponse = jsonDecode(jsonString);
+      print(jsonResponse);
+
+      listPosts = _generateFeed(jsonResponse);*/
+
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/nearPlaces"));
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.ok) {
+        String json = await response.transform(utf8.decoder).join();
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse["listPlaces"]);
+        listPlacesTmp = _generateList(jsonResponse["listPlaces"]);
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the near places function. Exception: $exception';
+    }
+    print("PASSOU ");
+    print(result);
+    setState(() {
+      listPlaces = listPlacesTmp;
+
+    });
+  }
+  List<Local> _generateList(List feedJson) {
+    List<Local> listPosts = [];
+    for (var postData in feedJson) {
+      listPosts.add(new Local.fromJSON(postData));
+    }
+    return listPosts;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
+    final container = AppLocationContainer.of(context);
+    initPlatformState(container);
     return new FutureBuilder(
-        future: _future,
+        future: container.getFuture(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData)
             return new Container(
@@ -163,78 +245,109 @@ class _UploadPage extends State<UploadPage>{
           return new ListView(
             //mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              new Container(
+              /*new Container(
                 height: 250.0,
                 child: //showMap(),
-                  new Stack(
+                new Stack(
                   children: <Widget>[
                     new Center(
                         child:
                         new Container(
-                      child: new Text(
-                        "You are supposed to see a map here.\n\nAPI Key is not valid.\n\n"
-                            "To view maps in the example application set the "
-                            "API_KEY variable in example/lib/main.dart. "
-                            "\n\nIf you have set an API Key but you still see this text "
-                            "make sure you have enabled all of the correct APIs "
-                            "in the Google API Console. See README for more detail.",
-                        textAlign: TextAlign.center,
-                      ),
-                      padding: const EdgeInsets.all(20.0),
-                    )),
+                          child: new Text(
+                            "You are supposed to see a map here.\n\nAPI Key is not valid.\n\n"
+                                "To view maps in the example application set the "
+                                "API_KEY variable in example/lib/main.dart. "
+                                "\n\nIf you have set an API Key but you still see this text "
+                                "make sure you have enabled all of the correct APIs "
+                                "in the Google API Console. See README for more detail.",
+                            textAlign: TextAlign.center,
+                          ),
+                          padding: const EdgeInsets.all(20.0),
+                        )),
                     new InkWell(
                       child: new Center(
                         child: new Image.network(staticMapUri.toString()),
                       ),
-                      onTap: showMap,
                     )
                   ],
                 ),
-              ),
-              new Container(
-                padding: new EdgeInsets.only(top: 10.0),
-                child: new Text(
-                  "Tap the map to interact",
-                  style: new TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              new Container(
-                padding: new EdgeInsets.only(top: 25.0),
-                child:
-                    new Text("Camera Position: \n\nLat: ${cameraPosition.center
-                    .latitude}\n\nLng:${cameraPosition.center
-                    .longitude}\n\nZoom: ${cameraPosition.zoom}"),
-              ),
-              new Container(
-                child: RaisedButton(
-                  onPressed: toggleTracking,
-                ),
-              )
+              ),*/
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  new Container(
+                    child: new Column(
+                      children: <Widget>[
+                        new RawMaterialButton(
+                          onPressed: () {_dialogOptions();},
+                          child: new Icon(
+                            Icons.photo_camera,
+                            color: Colors.white,
+                            size: 25.0,
+                          ),
+                          shape: new CircleBorder(),
+                          elevation: 2.0,
+                          fillColor: Color.fromRGBO(43, 65, 65, 1.0),
+                          padding: const EdgeInsets.all(10.0),
+                        ),
+                        new Text("Camera", style:new TextStyle(fontWeight: FontWeight.bold))
+                      ],
+                    ),
+                    alignment: Alignment.bottomRight,
+                    padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),),
+                  _buttonTracking(container),
+                  new Container(
+                    child: new Column(
+                      children: <Widget>[
+                        new RawMaterialButton(
+                          onPressed: () {showMap(container);},
+                          child: new Icon(
+                            Icons.map,
+                            color: Colors.white,
+                            size: 25.0,
+                          ),
+                          shape: new CircleBorder(),
+                          elevation: 2.0,
+                          fillColor: Color.fromRGBO(43, 65, 65, 1.0),
+                          padding: const EdgeInsets.all(10.0),
+                        ),
+                        new Text("View Map", style:new TextStyle(fontWeight: FontWeight.bold))
+                      ],
+                    ),
+                    alignment: Alignment.bottomRight,
+                    padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),),
+                ],),
+              new RefreshIndicator(child: getPlacesNear(), onRefresh: _refresh),
             ],
           );
 
         });
   }
 
-  showMap() {
-    mapView.onMapReady.listen((_) {
-      print("Map ready");
-    });
+  showMap(container) {
+    var last = container.getLocation();
+
+    Polyline route = new Polyline(
+        "route",
+        container.getLocations(),
+        width: 10.0,
+        color: Colors.red);
+
     mapView.show(
         new MapOptions(
             mapViewType: MapViewType.normal,
             showUserLocation: true,
             showMyLocationButton: true,
             showCompassButton: true,
-            initialCameraPosition: new CameraPosition(
-                new Location(cameraPosition.center.latitude, cameraPosition.center.altitude), 12.0),
+            initialCameraPosition: new CameraPosition(last, 16.0),
             hideToolbar: false,
-            title: "Recently Visited"),
+            title: "Your Route"),
         toolbarActions: [new ToolbarAction("Close", 1)]);
     StreamSubscription sub = mapView.onMapReady.listen((_) {
-      mapView.setMarkers(_markers);
-      mapView.setPolylines(_lines);
-      mapView.setPolygons(_polygons);
+      print("ESTA READY");
+      mapView.setMarkers(container.getMarkers());
+      mapView.addPolyline(route);
+      //mapView.setPolygons(_polygons);
     });
     /*
     compositeSubscription.add(sub);
@@ -246,9 +359,11 @@ class _UploadPage extends State<UploadPage>{
     sub = mapView.onTouchAnnotation
         .listen((annotation) => print("annotation ${annotation.id} tapped"));
     compositeSubscription.add(sub);
+    */
     sub = mapView.onTouchPolyline
         .listen((polyline) => print("polyline ${polyline.id} tapped"));
     compositeSubscription.add(sub);
+    /*
     sub = mapView.onTouchPolygon
         .listen((polygon) => print("polygon ${polygon.id} tapped"));
     compositeSubscription.add(sub);
@@ -261,24 +376,11 @@ class _UploadPage extends State<UploadPage>{
     sub = mapView.onCameraChanged.listen((cameraPosition) =>
         this.setState(() => this.cameraPosition = cameraPosition));
     compositeSubscription.add(sub);
-    sub = mapView.onAnnotationDragStart.listen((markerMap) {
-      var marker = markerMap.keys.first;
-      print("Annotation ${marker.id} dragging started");
-    });
-    sub = mapView.onAnnotationDragEnd.listen((markerMap) {
-      var marker = markerMap.keys.first;
-      print("Annotation ${marker.id} dragging ended");
-    });
-    sub = mapView.onAnnotationDrag.listen((markerMap) {
-      var marker = markerMap.keys.first;
-      var location = markerMap[marker];
-      print("Annotation ${marker.id} moved to ${location.latitude} , ${location
-          .longitude}");
-    });
-    compositeSubscription.add(sub);
+    */
     sub = mapView.onToolbarAction.listen((id) {
       print("Toolbar button id = $id");
       if (id == 1) {
+        sub.cancel();
         _handleDismiss();
       }
     });
@@ -286,12 +388,12 @@ class _UploadPage extends State<UploadPage>{
     sub = mapView.onInfoWindowTapped.listen((marker) {
       print("Info Window Tapped for ${marker.title}");
     });
-    compositeSubscription.add(sub);*/
+    compositeSubscription.add(sub);
     //sub = mapView.onIndoorBuildingActivated.listen(
-        //(indoorBuilding) => print("Activated indoor building $indoorBuilding"));
+    //(indoorBuilding) => print("Activated indoor building $indoorBuilding"));
     //compositeSubscription.add(sub);
     //sub = mapView.onIndoorLevelActivated.listen(
-        //(indoorLevel) => print("Activated indoor level $indoorLevel"));
+    //(indoorLevel) => print("Activated indoor level $indoorLevel"));
     //compositeSubscription.add(sub);
   }
   _handleDismiss() async {
@@ -299,12 +401,12 @@ class _UploadPage extends State<UploadPage>{
     Location centerLocation = await mapView.centerLocation;
     List<Marker> visibleAnnotations = await mapView.visibleAnnotations;
     List<Polyline> visibleLines = await mapView.visiblePolyLines;
-    List<Polygon> visiblePolygons = await mapView.visiblePolygons;
+    //List<Polygon> visiblePolygons = await mapView.visiblePolygons;
     print("Zoom Level: $zoomLevel");
     print("Center: $centerLocation");
     print("Visible Annotation Count: ${visibleAnnotations.length}");
     print("Visible Polylines Count: ${visibleLines.length}");
-    print("Visible Polygons Count: ${visiblePolygons.length}");
+    //print("Visible Polygons Count: ${visiblePolygons.length}");
     var uri = await staticMapProvider.getImageUriFromMap(mapView,
         width: 900, height: 400);
     setState(() => staticMapUri = uri);
@@ -374,6 +476,7 @@ class _UploadPage extends State<UploadPage>{
   }*/
 
 //Marker bubble
+  /*
   List<Marker> _markers = <Marker>[
     new Marker(
       "1",
@@ -388,18 +491,18 @@ class _UploadPage extends State<UploadPage>{
         height: 75.0,
       ),
     ),
-  ];
+  ];*/
 
   //Line
   List<Polyline> _lines = <Polyline>[
     new Polyline(
         "11",
         <Location>[
-          new Location(45.52309483308097, -122.67339684069155),
-          new Location(45.52298442915803, -122.66339991241693),
+          new Location(40.6313108, -8.6598865),
+          new Location(44.6313200, -8.6598865),
         ],
         width: 15.0,
-        color: Colors.blue),
+        color: Colors.red),
   ];
 
   //Drawing

@@ -4,10 +4,11 @@ import 'package:roadini/pages/feed_page.dart';
 import 'package:roadini/pages/plan_route_page.dart';
 import 'package:roadini/pages/profile_page.dart';
 import 'package:roadini/pages/upload_page.dart';
+import 'models/app_location.dart';
 
 void main(){
   MapView.setApiKey(API_KEY);
-  runApp(new MyApp());
+  runApp(new AppLocationContainer(child:new MyApp()));
 
 }
 const API_KEY = ('AIzaSyAKzTjJcIZKZDs2-ZD3B1njQl2mN3Tu5l8');
@@ -15,6 +16,10 @@ const API_KEY = ('AIzaSyAKzTjJcIZKZDs2-ZD3B1njQl2mN3Tu5l8');
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final container = AppLocationContainer.of(context);
+    container.create();
+    container.start();
+    //container.startStream();
     return new MaterialApp(
       title: 'RoadIni',
       home: new MainPage(),
@@ -36,23 +41,16 @@ PageController pageIndex;
 
 class _MainPage extends State<MainPage>{
 
-
   int _index = 0;
-
-
 
   @override
   void initState() {
     super.initState();
-
-
-
     pageIndex = new PageController();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return new Scaffold(
       body: new PageView(children: <Widget>[
         FeedPage(),

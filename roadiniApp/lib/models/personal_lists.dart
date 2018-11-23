@@ -396,15 +396,19 @@ class ItemField{
   int stars;
 
   factory ItemField.fromJSON(Map parsedJson){
-    return new ItemField(
-      parsedJson['name'],
-      parsedJson['location'],
-      parsedJson['postId'],
-      parsedJson['listId'],
-      parsedJson['description'],
-      parsedJson['urlImage'],
-      parsedJson['stars'],
-    );
+    String name = parsedJson['name'];
+    String location = parsedJson['location'];
+    int postId = parsedJson['postId'];
+    int listId = parsedJson['listId'];
+    String description;
+    if(parsedJson['description'] == null){
+      description = ".";
+    }else{
+      description = parsedJson['description'];
+    }
+    String urlImage = parsedJson['urlImage'];
+    int stars = parsedJson['stars'];
+    return new ItemField( name, location, description, postId, listId, urlImage, stars);
   }
 
 }
