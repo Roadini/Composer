@@ -407,6 +407,7 @@ class ItemField{
       description = parsedJson['description'];
     }
     String urlImage = parsedJson['urlImage'];
+    print(urlImage);
     int stars = parsedJson['stars'];
     return new ItemField( name, location, description, postId, listId, urlImage, stars);
   }

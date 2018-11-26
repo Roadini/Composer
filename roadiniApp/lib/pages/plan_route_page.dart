@@ -311,7 +311,6 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     });
   }
   _getListCategory ()async{
-    print(editElement.categoryId + " fazer pedido desta categoria");
     String result ="";
     List<PlanRoute> tmpListCategory;
 
@@ -407,7 +406,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
         'Error getting a feed:\nHttp status ${response.statusCode}';
       }
     } catch (exception) {
-      result = 'Failed invoking the getFeed function. Exception: $exception';
+      result = 'Failed invoking the function. Exception: $exception';
     }
     print(result);
     setState(() {

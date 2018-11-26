@@ -1,17 +1,18 @@
-//import 'package:roadini/util/person_header.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:map_view/figure_joint_type.dart';
 import 'package:map_view/map_view.dart';
-import 'package:map_view/polygon.dart';
 import 'package:map_view/polyline.dart';
 import 'package:roadini/main.dart';
 import 'package:roadini/models/app_location.dart';
 import 'package:roadini/models/local.dart';
+import 'package:roadini/models/local_image.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+
 
 
 class UploadPage extends StatefulWidget{
@@ -21,7 +22,6 @@ class UploadPage extends StatefulWidget{
 }
 class _UploadPage extends State<UploadPage>{
 
-  File file;
   bool prompted = false;
   MapView mapView = new MapView();
   CameraPosition cameraPosition;
@@ -29,12 +29,15 @@ class _UploadPage extends State<UploadPage>{
   var staticMapProvider = new StaticMapProvider(API_KEY);
   Uri staticMapUri;
   List<Local> listPlaces;
+  List<LocalImage> listPlacesImage;
+  TextEditingController _review;
 
 
   @override
   void initState() {
     super.initState();
     _load();
+    _review = new TextEditingController();
     /*if(prompted == false){
       _dialogOptions();
       setState(() {
@@ -56,7 +59,7 @@ class _UploadPage extends State<UploadPage>{
     setState(() {
     });
   }
-  _dialogOptions() async {
+  _dialogOptions(context2) async {
     prompted = true;
     return showDialog(
         context: context,
@@ -65,36 +68,12 @@ class _UploadPage extends State<UploadPage>{
           return new SimpleDialog(
             title: const Text("Post and Track"),
             children: <Widget>[
-              /*new SimpleDialogOption(
-                child: const Text("Add Place to personal lists"),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
-                  setState(() {
-                    file = imageFile;
-                  });
-                },
-
-              ),
-              new SimpleDialogOption(
-                child: const Text("Marker this place"),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
-                  setState(() {
-                    file = imageFile;
-                  });
-                },
-
-              ),*/
               new SimpleDialogOption(
                 child: const Text("Add new feed post"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
-                  setState(() {
-                    file = imageFile;
-                  });
+                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera, maxHeight: 500, maxWidth: 500, );
+                  newPage(imageFile, context2);
                 },
               ),
               new SimpleDialogOption(
@@ -102,9 +81,6 @@ class _UploadPage extends State<UploadPage>{
                 onPressed: () async {
                   Navigator.pop(context);
                   File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
-                  setState(() {
-                    file = imageFile;
-                  });
                 },
               )
             ],
@@ -191,6 +167,7 @@ class _UploadPage extends State<UploadPage>{
 
     String result;
     List<Local> listPlacesTmp;
+    List<LocalImage> listPlacesTmp2;
     print("_GETPLACES");
 
     try {
@@ -209,6 +186,7 @@ class _UploadPage extends State<UploadPage>{
         var jsonResponse = jsonDecode(json);
         print(jsonResponse["listPlaces"]);
         listPlacesTmp = _generateList(jsonResponse["listPlaces"]);
+        listPlacesTmp2 = _generateList2(jsonResponse["listPlaces"]);
       } else {
         result =
         'Error getting a feed:\nHttp status ${response.statusCode}';
@@ -219,6 +197,7 @@ class _UploadPage extends State<UploadPage>{
     print("PASSOU ");
     print(result);
     setState(() {
+      listPlacesImage = listPlacesTmp2;
       listPlaces = listPlacesTmp;
 
     });
@@ -227,6 +206,13 @@ class _UploadPage extends State<UploadPage>{
     List<Local> listPosts = [];
     for (var postData in feedJson) {
       listPosts.add(new Local.fromJSON(postData));
+    }
+    return listPosts;
+  }
+  List<LocalImage> _generateList2(List feedJson) {
+    List<LocalImage> listPosts = [];
+    for (var postData in feedJson) {
+      listPosts.add(new LocalImage.fromJSON(postData));
     }
     return listPosts;
   }
@@ -243,35 +229,7 @@ class _UploadPage extends State<UploadPage>{
                 alignment: FractionalOffset.center,
                 child: new CircularProgressIndicator());
           return new ListView(
-            //mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              /*new Container(
-                height: 250.0,
-                child: //showMap(),
-                new Stack(
-                  children: <Widget>[
-                    new Center(
-                        child:
-                        new Container(
-                          child: new Text(
-                            "You are supposed to see a map here.\n\nAPI Key is not valid.\n\n"
-                                "To view maps in the example application set the "
-                                "API_KEY variable in example/lib/main.dart. "
-                                "\n\nIf you have set an API Key but you still see this text "
-                                "make sure you have enabled all of the correct APIs "
-                                "in the Google API Console. See README for more detail.",
-                            textAlign: TextAlign.center,
-                          ),
-                          padding: const EdgeInsets.all(20.0),
-                        )),
-                    new InkWell(
-                      child: new Center(
-                        child: new Image.network(staticMapUri.toString()),
-                      ),
-                    )
-                  ],
-                ),
-              ),*/
               new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -279,7 +237,7 @@ class _UploadPage extends State<UploadPage>{
                     child: new Column(
                       children: <Widget>[
                         new RawMaterialButton(
-                          onPressed: () {_dialogOptions();},
+                          onPressed: () {_dialogOptions(context);},
                           child: new Icon(
                             Icons.photo_camera,
                             color: Colors.white,
@@ -322,6 +280,201 @@ class _UploadPage extends State<UploadPage>{
           );
 
         });
+  }
+
+  // ##################################################################################
+  //         New View to post image all functions under this comment
+  // ##################################################################################
+
+  _dialogOptions2(localImage, contextIndex, file){
+    return showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return new SimpleDialog(
+            children: <Widget>[
+              new SimpleDialogOption(
+                  child: const Text("Add Place to personal lists"),
+                  onPressed: () async {
+                    await _getLists(localImage, contextIndex, context , file);
+                  }
+
+              ),
+            ],
+          );
+        }
+
+    );
+  }
+  _getLists(localImage, contextIndex, contextDialog, file) async{
+
+    String result;
+    Map<int,String> lists = new Map();
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      int user_id = 1;
+      String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/listName/" + user_id.toString();
+      http.Response response = await http.get(url);
+      if (response.statusCode == HttpStatus.ok) {
+        var jsonResponse = jsonDecode(response.body);
+        print(jsonResponse["result"]);
+        for(var j in jsonResponse["result"]){
+          lists[j["listId"]]=j["listName"];
+        }
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
+    Navigator.pop(contextDialog);
+    _dialogOptionsList(lists, contextIndex, localImage, file);
+  }
+  _handleResponse(response, contextDialog, contextIndex){
+    if(response.statusCode==200){
+      var jsonResponse = jsonDecode(response.data);
+      if(jsonResponse["status"]==true){
+        Navigator.pop(contextDialog);
+        Navigator.pop(contextIndex);
+      }
+    }
+
+  }
+  _addItemToList(int key, String value, contextDialog, contextIndex, localImage, File file) async{
+    Dio dio = new Dio();
+    FormData formdata = new FormData(); // just like JS
+    formdata.add("photos", new UploadFileInfo(file, "fileUpload.jpeg"));
+    formdata.add('listId' ,key.toString());
+    formdata.add('userId' ,1.toString());
+    formdata.add('itemId' ,localImage.id.toString());
+    formdata.add('review' ,_review.text);
+    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/postImage", data: formdata, options: Options(
+        method: 'POST',
+        responseType: ResponseType.PLAIN // or ResponseType.JSON
+    ))
+        .then((response) => _handleResponse(response, contextDialog, contextIndex))
+        .catchError((error) => print(error));
+  }
+  _options(lists, contextDialog, contextIndex, localImage, file){
+    List<Widget> options = new List();
+    print(lists.length);
+    for(var l in lists.entries){
+      print(l);
+      options.add( new SimpleDialogOption(
+          child: Text(l.value),
+          onPressed: () {_addItemToList(l.key, l.value, contextDialog, contextIndex, localImage, file);}
+      ));
+    }
+    print(options);
+    return options;
+
+  }
+  _dialogOptionsList(Map<int, String>lists, contextIndex, localImage, file){
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext contextDialog) {
+          return new SimpleDialog(
+            children: <Widget>[
+              new ListTile(
+                title: new Text("Review:", style: new TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+              ),
+              new ListTile(
+                leading: const Icon(Icons.message, size: 15,),
+                title: new TextField(
+                  decoration: new InputDecoration(
+                    hintText: 'eg. I really liked this restaurant',
+                    //enabledBorder: InputBorder.none,
+
+                  ),
+                  controller: _review,
+                  style: new TextStyle(fontSize: 15, color: Colors.black),
+                ),
+              ),
+              new ListTile(
+                title:new Text("Select on of your lists:",
+                  style: new TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+              ),
+              new Column(
+                children: _options(lists, contextDialog, contextIndex, localImage, file),
+              )
+            ],
+          );
+        }
+    );
+
+  }
+  _iterateOverListPlacesPhoto(context2, file){
+    List<Widget> list = new List<Widget>();
+    for(var i = 0; i < listPlacesImage.length; i++){
+      list.add(new GestureDetector(
+        onTap: (){_dialogOptions2(listPlacesImage[i], context2, file);},
+        child: new Card(
+          elevation: 8.0,
+          margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+          child: Container(
+              decoration: BoxDecoration(color: Color.fromRGBO(90, 113, 113, 1.0)),
+              child:
+              new ListTile(
+                contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                leading: Container(
+                  padding: EdgeInsets.only(right: 12.0),
+                  decoration: new BoxDecoration(
+                      border: new Border(
+                          right: new BorderSide(width: 1.0, color: Colors.white24))),
+                  child: listPlacesImage[i].buildIcon(listPlacesImage[i].primaryType),
+                ),
+                title: Text(
+                  listPlacesImage[i].name,
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                subtitle:
+                Text(listPlacesImage[i].address, style: TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis,)
+                ,)
+          ),
+        ),
+      ),
+      );
+
+    }
+    return list;
+
+
+  }
+  newPage(file, context){
+    Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context2) {
+      return new Center(
+          child: new Scaffold(
+              appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: Center(
+                      child: Text("Roadini")
+                  )
+              ),
+              body:new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 300.0,
+                      //width: 250.0,
+                      decoration: new BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          image: DecorationImage(
+                              fit: BoxFit.contain,
+                              image: FileImage(file))
+                      ),
+                    ),
+                    new Column(
+                      children: _iterateOverListPlacesPhoto(context2, file),
+                    )
+                  ]
+              )
+          )
+      );
+    })
+    );
   }
 
   showMap(container) {
@@ -475,23 +628,6 @@ class _UploadPage extends State<UploadPage>{
     );
   }*/
 
-//Marker bubble
-  /*
-  List<Marker> _markers = <Marker>[
-    new Marker(
-      "1",
-      "Something fragile!",
-      45.52480841512737,
-      -122.66201455146073,
-      color: Colors.blue,
-      draggable: true, //Allows the user to move the marker.
-      markerIcon: new MarkerIcon(
-        "images/flower_vase.png",
-        width: 112.0,
-        height: 75.0,
-      ),
-    ),
-  ];*/
 
   //Line
   List<Polyline> _lines = <Polyline>[
@@ -503,70 +639,6 @@ class _UploadPage extends State<UploadPage>{
         ],
         width: 15.0,
         color: Colors.red),
-  ];
-
-  //Drawing
-  List<Polygon> _polygons = <Polygon>[
-    new Polygon(
-        "111",
-        <Location>[
-          new Location(45.5231233, -122.6733130),
-          new Location(45.5231195, -122.6706147),
-          new Location(45.5231120, -122.6677823),
-          new Location(45.5230894, -122.6670957),
-          new Location(45.5230518, -122.6660979),
-          new Location(45.5230518, -122.6655185),
-          new Location(45.5232849, -122.6652074),
-          new Location(45.5230443, -122.6649070),
-          new Location(45.5230443, -122.6644135),
-          new Location(45.5230518, -122.6639414),
-          new Location(45.5231195, -122.6638663),
-          new Location(45.5231947, -122.6638770),
-          new Location(45.5233074, -122.6639950),
-          new Location(45.5232698, -122.6643813),
-          new Location(45.5235480, -122.6644349),
-          new Location(45.5244349, -122.6645529),
-          new Location(45.5245928, -122.6639628),
-          new Location(45.5248108, -122.6632762),
-          new Location(45.5249385, -122.6626861),
-          new Location(45.5249310, -122.6622677),
-          new Location(45.5250212, -122.6621926),
-          new Location(45.5251490, -122.6621711),
-          new Location(45.5251791, -122.6623106),
-          new Location(45.5252242, -122.6625681),
-          new Location(45.5251791, -122.6632118),
-          new Location(45.5249010, -122.6640165),
-          new Location(45.5247431, -122.6646388),
-          new Location(45.5249611, -122.6646602),
-          new Location(45.5253820, -122.6642525),
-          new Location(45.5260811, -122.6642525),
-          new Location(45.5260435, -122.6637161),
-          new Location(45.5261713, -122.6635551),
-          new Location(45.5263066, -122.6634800),
-          new Location(45.5265471, -122.6635873),
-          new Location(45.5269003, -122.6639628),
-          new Location(45.5270356, -122.6642632),
-          new Location(45.5271484, -122.6646602),
-          new Location(45.5274866, -122.6649177),
-          new Location(45.5271258, -122.6651645),
-          new Location(45.5269605, -122.6653790),
-          new Location(45.5267049, -122.6654434),
-          new Location(45.5262990, -122.6657224),
-          new Location(45.5261337, -122.6666021),
-          new Location(45.5256677, -122.6678467),
-          new Location(45.5245777, -122.6687801),
-          new Location(45.5236908, -122.6690161),
-          new Location(45.5233751, -122.6692307),
-          new Location(45.5233826, -122.6714945),
-          new Location(45.5233337, -122.6729804),
-          new Location(45.5233225, -122.6732969),
-          new Location(45.5232398, -122.6733506),
-          new Location(45.5231233, -122.6733130),
-        ],
-        jointType: FigureJointType.bevel,
-        strokeWidth: 5.0,
-        strokeColor: Colors.red,
-        fillColor: Color.fromARGB(75, 255, 0, 0)),
   ];
 }
 class CompositeSubscription {

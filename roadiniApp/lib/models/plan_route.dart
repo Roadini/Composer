@@ -3,25 +3,28 @@ import 'package:flutter/material.dart';
 class PlanRoute {
   const PlanRoute(
       { this.categoryName,
-        this.categoryId,
         this.placeName,
         this.placeId,
+        this.lat,
+        this.lng,
         this.placeDescription,
         this.urlImage});
 
   final String categoryName;
-  final String categoryId;
   final String placeName;
   final String placeId;
+  final double lat;
+  final double lng;
   final String placeDescription;
   final String urlImage;
 
   factory PlanRoute.fromJSON(Map parsedJson){
     return new PlanRoute(
       categoryName: parsedJson['categoryName'],
-      categoryId: parsedJson['categoryId'],
       placeName: parsedJson['placeName'],
       placeId: parsedJson['placeId'],
+      lat: parsedJson['lat'],
+      lng: parsedJson['lng'],
       placeDescription: parsedJson['placeDescription'],
       urlImage : parsedJson['urlImage'],
     );

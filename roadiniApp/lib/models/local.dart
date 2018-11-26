@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadini/models/app_location.dart';
 import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
