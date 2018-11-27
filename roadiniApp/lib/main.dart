@@ -5,34 +5,38 @@ import 'package:roadini/pages/plan_route_page.dart';
 import 'package:roadini/pages/profile_page.dart';
 import 'package:roadini/pages/upload_page.dart';
 import 'models/app_location.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:roadini/pages/login_page.dart';
+import 'package:roadini/models/user_app.dart';
 
 void main(){
   MapView.setApiKey(API_KEY);
-  runApp(new AppLocationContainer(child:new MyApp()));
+  runApp(new AppUserContainer(child: new AppLocationContainer(child:new MyApp())));
 
 }
 const API_KEY = ('AIzaSyAKzTjJcIZKZDs2-ZD3B1njQl2mN3Tu5l8');
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     final container = AppLocationContainer.of(context);
     container.create();
     container.start();
-    //container.startStream();
     return new MaterialApp(
-      title: 'RoadIni',
-      home: new MainPage(),
-      theme: new ThemeData(          // Add the 3 lines from here...
-        primaryColor: Color.fromRGBO(43, 65, 65, 1.0),
-        //primaryColor: Colors.redAccent,
-        fontFamily: 'Roboto',
+        title: 'RoadIni',
+        theme: new ThemeData(          // Add the 3 lines from here...
+          primaryColor: Color.fromRGBO(43, 65, 65, 1.0),
+          //primaryColor: Colors.redAccent,
+          fontFamily: 'Roboto',
 
-      ),
+        ),
+        home: new MainPage()
     );
   }
 }
 class MainPage extends StatefulWidget{
+
   @override
   _MainPage createState() => new _MainPage();
 }
@@ -40,7 +44,6 @@ class MainPage extends StatefulWidget{
 PageController pageIndex;
 
 class _MainPage extends State<MainPage>{
-
   int _index = 0;
 
   @override
@@ -49,9 +52,20 @@ class _MainPage extends State<MainPage>{
     pageIndex = new PageController();
   }
 
+  void onLogin() {
+    setState(() {
+    });
+  }
+  firstPage(){
+    return LoginScreen(onLogin);
+  }
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    final container = AppUserContainer.of(context);
+
+    return container.getUser() == null
+    ? firstPage() :
+    new Scaffold(
       body: new PageView(children: <Widget>[
         FeedPage(),
         PlanRoutePage(),
@@ -106,7 +120,7 @@ class _MainPage extends State<MainPage>{
       this._index = page;
     });
   }
-   @override
+  @override
   void dispose() {
     super.dispose();
     pageIndex.dispose();

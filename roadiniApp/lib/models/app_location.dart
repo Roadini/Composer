@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart' as l;
 import 'package:map_view/map_view.dart';
+//import 'package:permission_handler/permission_handler.dart';
 
 class AppLocation{
   bool tracking;
@@ -56,6 +57,17 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
   // manipulate it with widget.state.
   AppLocation state;
 
+  getPermission(_location) async{
+    /*Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.location, PermissionGroup.locationWhenInUse, PermissionGroup.locationAlways]);
+    permissions.forEach((k,v) => (){
+      print(k);
+      print(v);
+
+    });*/
+
+
+  }
+
   void create(){
     if(state == null) {
       print("MERDA");
@@ -105,6 +117,7 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
   }
 
   start() async{
+    print("ENTROU NO START");
     if(state._future == null) {
       state._future = await initPlatformState();
       await startStream();
@@ -113,6 +126,9 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
 
 
   initPlatformState() async {
+    var permission = await getPermission(this.state._location);
+    print(permission);
+
     Map<String, double> location;
 
     String error;
