@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'dart:convert';
 import 'package:roadini/models/user_app.dart';
+import 'package:dio/dio.dart';
 
 class LoginScreen extends StatefulWidget {
 
@@ -62,9 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           if(cookie != "null" && cookie != "" && cookie != null){
             print(cookie);
-            final container = AppUserContainer.of(context);
-            container.create("tiago", 1, "tiago@ua.pt", cookie);
-            this.onLogin();
+            await getInfo(cookie);
 
           }
         });
@@ -81,6 +80,33 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  getInfo(cookie) async{
+
+    Dio dio = new Dio();
+
+    FormData formData = new FormData(); // just like JS
+    formData.add('cookie' ,cookie);
+    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/createUser", data: formData, options: Options(
+        method: 'POST',
+        responseType: ResponseType.PLAIN // or ResponseType.JSON
+    ))
+        .then((response) => _handleResponse(response))
+        .catchError((error) => print(error));
+    return null;
+  }
+  _handleResponse(response){
+    if(response.statusCode==200){
+      var jsonResponse = jsonDecode(response.data);
+      if(jsonResponse["status"]==true){
+        final container = AppUserContainer.of(context);
+        print("ON LOGIN");
+        print(jsonResponse);
+        container.create(jsonResponse["name"], jsonResponse["id"], jsonResponse["email"], jsonResponse["age"], jsonResponse["description"], jsonResponse["gender"]);
+        this.onLogin();
+      }
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {

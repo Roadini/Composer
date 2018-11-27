@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:roadini/models/card_feed_routes.dart';
 import 'package:roadini/models/personal_lists.dart';
 import 'package:roadini/models/profile_fields.dart';
 import 'package:roadini/util/profile_column.dart';
+import 'package:roadini/models/user_app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget{
 
@@ -27,34 +30,34 @@ class _ProfilePage extends State<ProfilePage> {
   _getUser() async{
    String result;
    ProfileFields user;
-
    try {
-     String jsonString = await _loadJsonAsset('assets/profile.json');
-     var jsonResponse = jsonDecode(jsonString);
-     print(jsonResponse);
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+     final container = AppUserContainer.of(context);
+     int id = container.getUser().userId;
 
-     user = new ProfileFields.fromJSON(jsonResponse);
-
-     /*var request = await httpClient.getUrl(Uri.parse(url));
-      var response = await request.close();
-      if (response.statusCode == HttpStatus.OK) {
-        String json = await response.transform(utf8.decoder).join();
-        prefs.setString("feed", json);
-        List<Map<String, dynamic>> data =
-        jsonDecode(json).cast<Map<String, dynamic>>();
-        listOfPosts = _generateFeed(data);
-      } else {
-        result =
-        'Error getting a feed:\nHttp status ${response.statusCode}';
-      }*/
+     var httpClient = new HttpClient();
+     var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/ownLists/" + id.toString()));
+     var response = await request.close();
+     if (response.statusCode == HttpStatus.ok) {
+       String json = await response.transform(utf8.decoder).join();
+       var jsonResponse = jsonDecode(json);
+       print(jsonResponse);
+       user = ProfileFields.fromVars(container.getUser().name, 0, id, 0, id, container.getUser().description, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ");
+     } else {
+       result =
+       'Error getting a feed:\nHttp status ${response.statusCode}';
+     }
    } catch (exception) {
      result = 'Failed invoking the getFeed function. Exception: $exception';
    }
+
+
    print(result);
    return user;
   }
   @override
   Widget build(BuildContext context) {
+    final container = AppUserContainer.of(context);
     return new FutureBuilder(
         future: _getUser(),
         builder: (context, snapshot) {
@@ -74,7 +77,7 @@ class _ProfilePage extends State<ProfilePage> {
                         new CircleAvatar(
                           radius:40.0,
                           backgroundColor: Colors.grey,
-                          backgroundImage: new NetworkImage("https://scontent.flis1-1.fna.fbcdn.net/v/t1.0-9/20258438_1893652067570862_4019107659665964412_n.jpg?_nc_cat=111&oh=b69b337a86923445d87ed7b445acd224&oe=5C4F4156"),
+                          backgroundImage: new NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ"),
                         ),
                         new Expanded(
                             flex:1,
@@ -84,7 +87,7 @@ class _ProfilePage extends State<ProfilePage> {
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   mainAxisSize: MainAxisSize.max,
                                   children: <Widget>[
-                                    ProfileColumn("countrys", snapshot.data.numberCountries),
+                                    ProfileColumn("countrys", container.getUser().userId),
                                     ProfileColumn("followers", snapshot.data.followers),
                                     ProfileColumn("following", snapshot.data.following),
 
@@ -99,7 +102,7 @@ class _ProfilePage extends State<ProfilePage> {
                         alignment: Alignment.centerLeft,
                         padding: const EdgeInsets.only(top: 15.0),
                         child: new Text(
-                          snapshot.data.name,
+                          container.getUser().name,
                           style: new TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color.fromRGBO(43, 65, 65, 1.0)
@@ -110,7 +113,7 @@ class _ProfilePage extends State<ProfilePage> {
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.only(top: 1.0),
                       child: new Text(
-                        snapshot.data.description,
+                        container.getUser().description,
                         style: new TextStyle(
                           color: Colors.grey,
                           fontWeight: FontWeight.w400,

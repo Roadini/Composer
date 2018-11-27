@@ -58,13 +58,20 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
   AppLocation state;
 
   getPermission(_location) async{
+    /*PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
+    PermissionStatus permission1 = await PermissionHandler().checkPermissionStatus(PermissionGroup.locationAlways);
+    PermissionStatus permission2 = await PermissionHandler().checkPermissionStatus(PermissionGroup.locationWhenInUse);
+
+    print(permission);
+    print(permission1);
+    print(permission2);*/
+
     /*Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.location, PermissionGroup.locationWhenInUse, PermissionGroup.locationAlways]);
     permissions.forEach((k,v) => (){
       print(k);
       print(v);
 
     });*/
-
 
   }
 
@@ -109,7 +116,9 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
   }
 
   addMarker(double lng, double lat, String name){
-    Marker m = new Marker("0", name, lng, lat);
+    print("ADD MARKER");
+    print(lng);
+    Marker m = new Marker("0", name, lat, lng);
     state.markers.add(m);
     print(state.markers.length);
     setState(() {

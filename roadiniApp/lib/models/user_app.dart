@@ -4,13 +4,18 @@ class AppUser{
   String name;
   int userId;
   String email;
-  String jwt;
+  int age;
+  String description;
+  String gender;
 
-  AppUser(String name, int userId, String email, String jwt) {
+  AppUser(String name, int userId, String email, int age, String description, String male) {
     this.name=name;
     this.userId=userId;
     this.email = email;
-    this.jwt = jwt;
+    this.age = age;
+    this.description = description;
+    this.gender = gender;
+
   }
 
 
@@ -45,10 +50,10 @@ class _AppUserContainerState extends State<AppUserContainer> {
   // manipulate it with widget.state.
   AppUser user;
 
-  void create(name, id, mail, jwt){
+  void create(String name, int userId, String email, int age, String description, String male){
     if(user == null) {
       print("MERDA");
-      user = new AppUser(name, id, mail, jwt);
+      user = new AppUser(name, userId, email, age, description, male);
     }
   }
   AppUser getUser(){

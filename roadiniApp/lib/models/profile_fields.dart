@@ -18,6 +18,17 @@ class ProfileFields{
   final String description;
   final String urlImage;
 
+  factory ProfileFields.fromVars(name, followers, numberCountries, following, id, description, urlImage){
+    return new ProfileFields(
+      name: name,
+      followers: followers,
+      numberCountries: numberCountries,
+      following:following,
+      id: id,
+      description: description,
+      urlImage :urlImage,
+    );
+  }
   factory ProfileFields.fromJSON(Map parsedJson){
     return new ProfileFields(
       name: parsedJson['name'],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:roadini/models/user_app.dart';
 
 class PersonalLists extends StatefulWidget{
   const PersonalLists();
@@ -52,9 +53,12 @@ class _PersonalLists extends State<PersonalLists> {
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      final container = AppUserContainer.of(context);
+      int id = container.getUser().userId;
+      print(id);
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/ownLists"));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/ownLists/" + id.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
