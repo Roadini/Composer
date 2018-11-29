@@ -90,18 +90,18 @@ class _LoginScreenState extends State<LoginScreen> {
         method: 'POST',
         responseType: ResponseType.PLAIN // or ResponseType.JSON
     ))
-        .then((response) => _handleResponse(response))
+        .then((response) => _handleResponse(response, cookie))
         .catchError((error) => print(error));
     return null;
   }
-  _handleResponse(response){
+  _handleResponse(response, String cookie){
     if(response.statusCode==200){
       var jsonResponse = jsonDecode(response.data);
       if(jsonResponse["status"]==true){
         final container = AppUserContainer.of(context);
         print("ON LOGIN");
         print(jsonResponse);
-        container.create(jsonResponse["name"], jsonResponse["id"], jsonResponse["email"], jsonResponse["age"], jsonResponse["description"], jsonResponse["gender"]);
+        container.create(jsonResponse["name"], jsonResponse["id"], jsonResponse["email"], jsonResponse["age"], jsonResponse["description"], jsonResponse["gender"], cookie.substring(4,cookie.length));
         this.onLogin();
       }
     }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 class AppUser{
   String name;
@@ -49,13 +52,84 @@ class _AppUserContainerState extends State<AppUserContainer> {
   // Just padding the state through so we don't have to
   // manipulate it with widget.state.
   AppUser user;
+  IOWebSocketChannel channel;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  void create(String name, int userId, String email, int age, String description, String male){
+  void create(String name, int userId, String email, int age, String description, String male, String cookie){
     if(user == null) {
-      print("MERDA");
       user = new AppUser(name, userId, email, age, description, male);
+      try{
+        this.channel = new IOWebSocketChannel.connect("ws://engserv-1-aulas.ws.atnog.av.it.pt/ws");
+
+        this.channel.stream.listen(
+            _onReceptionOfMessageFromServer,
+            onError: (error, StackTrace stackTrace){
+              print(error);
+              // error handling
+            },
+            onDone: (){
+              // communication has been closed
+              print("FECCHOU");
+            }
+        );
+        startWebSocket(cookie);
+      } catch(e){
+        print("BIG ERRO");
+        print(e);
+
+      }
+      flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+      var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
+      var initializationSettingsIOS = new IOSInitializationSettings();
+      var initializationSettings = new InitializationSettings( initializationSettingsAndroid, initializationSettingsIOS);
+      flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: onSelectNotification);
     }
   }
+  Future onSelectNotification(String payload) async {
+      if (payload != null) {
+        debugPrint('notification payload: ' + payload);
+      }
+      showDialog(
+        context: context,
+        builder: (_) {
+          return new AlertDialog(
+            title: Text("PayLoad"),
+            content: Text("Payload : $payload"),
+          );
+        },
+      );
+  }
+
+  Future showNotificationWithDefaultSound() async {
+    print("NOTIFICATIN");
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Post',
+      'How to Show Notification in Flutter',
+      platformChannelSpecifics,
+      payload: 'Default_Sound',
+    );
+  }
+
+  _onReceptionOfMessageFromServer(message){
+    showNotificationWithDefaultSound();
+    print(message);
+
+  }
+  void startWebSocket(String cookie){
+    var login = '{ "Type": "login", "Data": { "token": "'+cookie+'", "server": "172.22.0.4" } }';
+    channel.sink.add(login);
+    var message = '{ "Type": "publish", "Data": { "to": "'+3.toString()+'", "text": "oi gatinho" } }';
+    channel.sink.add(message);
+
+  }
+
   AppUser getUser(){
     if(user == null) {
       return null;

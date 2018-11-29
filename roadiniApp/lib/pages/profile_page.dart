@@ -136,6 +136,7 @@ class _ProfilePage extends State<ProfilePage> {
 
     final container = AppUserContainer.of(context);
     int personalId = container.getUser().userId;
+    container.showNotificationWithDefaultSound();
 
     //FOLLOW BUTTON
     Container buildFollowButton(

@@ -9,6 +9,7 @@ import 'package:roadini/pages/login_page.dart';
 import 'package:roadini/models/user_app.dart';
 import 'package:roadini/pages/search_page.dart';
 
+
 void main(){
   MapView.setApiKey(API_KEY);
   runApp(new AppUserContainer(child: new AppLocationContainer(child:new MyApp())));
@@ -50,6 +51,7 @@ class _MainPage extends State<MainPage>{
   void initState() {
     super.initState();
     pageIndex = new PageController();
+
   }
 
   void onLogin() {
