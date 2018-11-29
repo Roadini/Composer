@@ -20,114 +20,288 @@ class ProfilePage extends StatefulWidget{
 class _ProfilePage extends State<ProfilePage> {
   final int id;
   _ProfilePage(this.id);
+  ProfileFields userProfile;
 
   String view ="routes"; //default is routes or change to places
   List<CardFeedRoutes> cardFeedRoutes;
   List<PersonalLists> personalListPlaces;
 
+  bool isFollowing = false;
+  bool followButtonClicked = false;
 
 
-  _getUser() async{
-   String result;
-   ProfileFields user;
-   try {
-     SharedPreferences prefs = await SharedPreferences.getInstance();
-     final container = AppUserContainer.of(context);
-     int id = container.getUser().userId;
+  _getUser(id) async{
+    String result;
+    ProfileFields user;
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final container = AppUserContainer.of(context);
+      int personalId = container.getUser().userId;
 
-     var httpClient = new HttpClient();
-     var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/ownLists/" + id.toString()));
-     var response = await request.close();
-     if (response.statusCode == HttpStatus.ok) {
-       String json = await response.transform(utf8.decoder).join();
-       var jsonResponse = jsonDecode(json);
-       print(jsonResponse);
-       user = ProfileFields.fromVars(container.getUser().name, 0, id, 0, id, container.getUser().description, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ");
-     } else {
-       result =
-       'Error getting a feed:\nHttp status ${response.statusCode}';
-     }
-   } catch (exception) {
-     result = 'Failed invoking the getFeed function. Exception: $exception';
-   }
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/userInfo/" +personalId.toString() +"/" +id.toString()));
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.ok) {
+        String json = await response.transform(utf8.decoder).join();
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse);
+        List<int> followers = new List();
+        List<int> following = new List();
+        for(var l in jsonResponse["followers"]){
+          followers.add(l["id"]);
+        }
+        for(var l in jsonResponse["following"]){
+          following.add(l["id"]);
+        }
+        user = ProfileFields.fromVars(jsonResponse["name"], followers, id, following, id, jsonResponse["description"], "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ");
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
 
 
-   print(result);
-   return user;
+    print("RETURN");
+    return user;
   }
+
+  editProfile() {
+  }
+
+  followUser() async {
+    print('following user');
+    String result;
+    try {
+      final container = AppUserContainer.of(context);
+      int personalId = container.getUser().userId;
+
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/follow/" +personalId.toString() +"/" +id.toString()));
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.ok) {
+        String json = await response.transform(utf8.decoder).join();
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse);
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
+
+    setState(() {
+      this.isFollowing = true;
+      this.followButtonClicked = true;
+      this.userProfile.followers.add(this.id);
+      print(this.userProfile.followers.length);
+
+    });
+  }
+
+  unFollowUser() async{
+    print('unfollowing user');
+    String result;
+    try {
+      final container = AppUserContainer.of(context);
+      int personalId = container.getUser().userId;
+
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/unfollow/" +personalId.toString() +"/" +id.toString()));
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.ok) {
+        String json = await response.transform(utf8.decoder).join();
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse);
+      } else {
+        result =
+        'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
+    setState(() {
+      this.userProfile.followers.remove(this.id);
+      this.isFollowing = false;
+      this.followButtonClicked = true;
+
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
     final container = AppUserContainer.of(context);
+    int personalId = container.getUser().userId;
+
+    //FOLLOW BUTTON
+    Container buildFollowButton(
+        {String text,
+          Color backGroundColor,
+          Color textColor,
+          Color borderColor,
+          Function function}) {
+      return new Container(
+        padding: const EdgeInsets.only(top: 2.0),
+        child: new FlatButton(
+            onPressed: function,
+            child: new Container(
+              decoration: new BoxDecoration(
+                  color: backGroundColor,
+                  border: new Border.all(color: borderColor),
+                  borderRadius: new BorderRadius.circular(5.0)),
+              alignment: Alignment.center,
+              child: new Text(text,
+                  style: new TextStyle(
+                      color: textColor, fontWeight: FontWeight.bold)),
+              width: 200.0,
+              height: 27.0,
+            )),
+      );
+    }
+
+    //OPTION FOR BUTTON FOLLOW
+    Container buildProfileFollowButton(ProfileFields user) {
+      // viewing your own profile - should show edit button
+      if (user.id == personalId) {
+        return buildFollowButton(
+          text: "Edit Profile",
+          backGroundColor: Colors.white,
+          textColor: Colors.black,
+          borderColor: Colors.grey,
+          function: editProfile,
+        );
+      }
+
+      // already following user - should show unfollow button
+      if (isFollowing) {
+        return buildFollowButton(
+          text: "Unfollow",
+          backGroundColor: Colors.white,
+          textColor: Colors.black,
+          borderColor: Colors.grey,
+          function: unFollowUser,
+        );
+      }
+
+      // does not follow user - should show follow button
+      if (!isFollowing) {
+        return buildFollowButton(
+          text: "Follow",
+          backGroundColor: Color.fromRGBO(90, 113, 113, 1.0),
+          textColor: Colors.white,
+          borderColor: Color.fromRGBO(90, 113, 113, 1.0),
+          function: followUser,
+        );
+      }
+
+      return buildFollowButton(
+          text: "loading...",
+          backGroundColor: Colors.white,
+          textColor: Colors.black,
+          borderColor: Colors.grey);
+    }
+    //final container = AppUserContainer.of(context);
     return new FutureBuilder(
-        future: _getUser(),
+        future: _getUser(this.id),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
+
+          if(!snapshot.hasData){
             return new Container(
                 alignment: FractionalOffset.center,
                 child: new CircularProgressIndicator());
+          }
+          userProfile = snapshot.data;
 
-          return new ListView(
-            children: <Widget>[
-              new Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: new Column(
-                  children: <Widget>[
-                    new Row(
+
+          if (userProfile.followers.contains(personalId) &&
+              followButtonClicked == false) {
+            isFollowing = true;
+          }
+
+          return new Scaffold(
+              appBar: new AppBar(title: new Text(
+                userProfile.name,
+                style: const TextStyle(color: Colors.black),
+              ),
+                backgroundColor: Colors.white,
+              ),
+
+
+              body:new ListView(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new Column(
                       children: <Widget>[
-                        new CircleAvatar(
-                          radius:40.0,
-                          backgroundColor: Colors.grey,
-                          backgroundImage: new NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ"),
-                        ),
-                        new Expanded(
-                            flex:1,
-                            child: new Column(
-                              children: <Widget>[
-                                new Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  mainAxisSize: MainAxisSize.max,
+                        new Row(
+                          children: <Widget>[
+                            new CircleAvatar(
+                              radius:40.0,
+                              backgroundColor: Colors.grey,
+                              backgroundImage: new NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ"),
+                            ),
+                            new Expanded(
+                                flex:1,
+                                child: new Column(
                                   children: <Widget>[
-                                    ProfileColumn("countrys", container.getUser().userId),
-                                    ProfileColumn("followers", snapshot.data.followers),
-                                    ProfileColumn("following", snapshot.data.following),
+                                    new Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: <Widget>[
+                                        ProfileColumn("countrys", userProfile.id),
+                                        ProfileColumn("followers", userProfile.followers.length),
+                                        ProfileColumn("following", userProfile.following.length),
 
+                                      ],
+                                    ),
+                                    new Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                        children: <Widget>[
+                                          buildProfileFollowButton(userProfile)
+                                        ]
+                                    ),
                                   ],
                                 )
-                              ],
                             )
-                        )
+                          ],
+                        ),
+                        new Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(top: 15.0),
+                            child: new Text(
+                              userProfile.name,
+                              style: new TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(43, 65, 65, 1.0)
+                              ),
+
+                            )),
+                        new Container(
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.only(top: 1.0),
+                          child: new Text(
+                            userProfile.description,
+                            style: new TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    new Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(top: 15.0),
-                        child: new Text(
-                          container.getUser().name,
-                          style: new TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromRGBO(43, 65, 65, 1.0)
-                          ),
-
-                        )),
-                    new Container(
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(top: 1.0),
-                      child: new Text(
-                        container.getUser().description,
-                        style: new TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              buildOptionButtonBar(),
-              new Divider(),
-              buildView(),
-            ],
-          );});
+                  ),
+                  buildOptionButtonBar(),
+                  new Divider(),
+                  buildView(userProfile.id),
+                ],
+              )
+          );
+        });
   }
 
   Row buildOptionButtonBar(){
@@ -174,7 +348,7 @@ class _ProfilePage extends State<ProfilePage> {
 
   }
 
-  Column buildView(){
+  Column buildView(userId){
 
     if(view == "routes") {
       return new Column(
@@ -184,7 +358,7 @@ class _ProfilePage extends State<ProfilePage> {
     }else{
       return new Column(
         children: <Widget>[
-          PersonalLists(),
+          PersonalLists(userId:userId),
         ],
       );
     }
@@ -202,3 +376,4 @@ void openProfile(BuildContext context, int userId){
     return new ProfilePage(userId: userId);
   }));
 }
+

@@ -5,9 +5,9 @@ import 'package:roadini/pages/plan_route_page.dart';
 import 'package:roadini/pages/profile_page.dart';
 import 'package:roadini/pages/upload_page.dart';
 import 'models/app_location.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:roadini/pages/login_page.dart';
 import 'package:roadini/models/user_app.dart';
+import 'package:roadini/pages/search_page.dart';
 
 void main(){
   MapView.setApiKey(API_KEY);
@@ -70,7 +70,8 @@ class _MainPage extends State<MainPage>{
         FeedPage(),
         PlanRoutePage(),
         UploadPage(),
-        ProfilePage(),
+        SearchPage(),
+        ProfilePage(userId:container.getUser().userId),
       ],
         controller: pageIndex,
         onPageChanged: onPageChanged,
@@ -97,9 +98,9 @@ class _MainPage extends State<MainPage>{
             new BottomNavigationBarItem(
                 icon: new Icon(Icons.add_circle),
                 title: new Container()),
-            /*new BottomNavigationBarItem(
+            new BottomNavigationBarItem(
                 icon: new Icon(Icons.search),
-                title: new Container()),*/
+                title: new Container()),
             new BottomNavigationBarItem(
                 icon: new Icon(Icons.person_outline),
                 title: new Container()),
@@ -108,7 +109,7 @@ class _MainPage extends State<MainPage>{
           onTap: navBarTapped,
           currentIndex: _index,
         ),),
-      appBar: AppBar(title: Center(child: Text("RoadIni"))),
+      //appBar: AppBar(title: Center(child: Text("RoadIni"))),
     );
   }
   navBarTapped(int page){

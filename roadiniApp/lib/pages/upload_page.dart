@@ -179,7 +179,7 @@ class _UploadPage extends State<UploadPage>{
       listPosts = _generateFeed(jsonResponse);*/
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/nearPlaces"));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/nearPlaces"));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -228,7 +228,16 @@ class _UploadPage extends State<UploadPage>{
             return new Container(
                 alignment: FractionalOffset.center,
                 child: new CircularProgressIndicator());
-          return new ListView(
+          return new Scaffold(
+            appBar: AppBar(title: Center(
+                child: Text("RoadIni",
+                  style: new TextStyle(
+                    color: Color.fromRGBO(43, 65, 65, 1.0),
+                  ),)
+              ),
+              backgroundColor: Colors.white,),
+
+          body : new ListView(
             children: <Widget>[
               new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,6 +286,7 @@ class _UploadPage extends State<UploadPage>{
                 ],),
               new RefreshIndicator(child: getPlacesNear(), onRefresh: _refresh),
             ],
+          ),
           );
 
         });
@@ -314,7 +324,7 @@ class _UploadPage extends State<UploadPage>{
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       int user_id = 1;
-      String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/listName/" + user_id.toString();
+      String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + user_id.toString();
       http.Response response = await http.get(url);
       if (response.statusCode == HttpStatus.ok) {
         var jsonResponse = jsonDecode(response.body);
@@ -350,7 +360,7 @@ class _UploadPage extends State<UploadPage>{
     formdata.add('userId' ,1.toString());
     formdata.add('itemId' ,localImage.id.toString());
     formdata.add('review' ,_review.text);
-    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/postImage", data: formdata, options: Options(
+    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/postImage", data: formdata, options: Options(
         method: 'POST',
         responseType: ResponseType.PLAIN // or ResponseType.JSON
     ))

@@ -12,8 +12,8 @@ class ProfileFields{
 
   final String name;
   final int numberCountries;
-  final int followers;
-  final int following;
+  final List<int> followers;
+  final List<int> following;
   final int id;
   final String description;
   final String urlImage;

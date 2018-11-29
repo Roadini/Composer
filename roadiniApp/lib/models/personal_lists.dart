@@ -8,13 +8,16 @@ import 'package:http/http.dart' as http;
 import 'package:roadini/models/user_app.dart';
 
 class PersonalLists extends StatefulWidget{
-  const PersonalLists();
+  final int userId;
+  const PersonalLists({this.userId});
 
 
-  _PersonalLists createState() => new _PersonalLists();
+  _PersonalLists createState() => new _PersonalLists(this.userId);
 
 }
 class _PersonalLists extends State<PersonalLists> {
+  final int userId;
+  _PersonalLists(this.userId);
 
   List<ListFields> listShow;
   var _listShow;
@@ -53,12 +56,9 @@ class _PersonalLists extends State<PersonalLists> {
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final container = AppUserContainer.of(context);
-      int id = container.getUser().userId;
-      print(id);
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/ownLists/" + id.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/ownLists/" + this.userId.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -184,29 +184,44 @@ class _PersonalLists extends State<PersonalLists> {
                 }
 
               }
-              return new Column(children: <Widget>[
-                new Column(
-                  children: list,
-                ),
-                new Container(
 
-                  child: new RawMaterialButton(
-                    onPressed: () {_dialogOptions();},
-                    child: new Icon(
-                      Icons.add,
-                      color: Colors.white,
-                      size: 35.0,
-                    ),
-                    shape: new CircleBorder(),
-                    elevation: 2.0,
-                    fillColor: Color.fromRGBO(43, 65, 65, 1.0),
-                    padding: const EdgeInsets.all(10.0),
+              final container = AppUserContainer.of(context);
+              int id = container.getUser().userId;
+              if(this.userId == id) {
+                return new Column(children: <Widget>[
+                  new Column(
+                    children: list,
                   ),
-                  alignment: Alignment.bottomRight,
-                  padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
-                )
+                  new Container(
 
-              ]);
+                    child: new RawMaterialButton(
+                      onPressed: () {
+                        _dialogOptions();
+                      },
+                      child: new Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 35.0,
+                      ),
+                      shape: new CircleBorder(),
+                      elevation: 2.0,
+                      fillColor: Color.fromRGBO(43, 65, 65, 1.0),
+                      padding: const EdgeInsets.all(10.0),
+                    ),
+                    alignment: Alignment.bottomRight,
+                    padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                  )
+
+                ]);
+              }else{
+
+                return new Column(children: <Widget>[
+                  new Column(
+                    children: list,
+                  ),
+                ]);
+
+              }
 
             }
         )
@@ -262,7 +277,7 @@ class _PersonalLists extends State<PersonalLists> {
     try {
       var data = {'name': name};
       print(data.toString());
-      http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/createList", body:data);
+      http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/createList", body:data);
       print(response);
       var json_response = jsonDecode(response.body);
       if (response.statusCode == HttpStatus.ok) {
