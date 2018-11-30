@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:convert';
 
 
 class AppUser{
@@ -100,8 +101,7 @@ class _AppUserContainerState extends State<AppUserContainer> {
       );
   }
 
-  Future showNotificationWithDefaultSound() async {
-    print("NOTIFICATIN");
+  Future showNotificationWithDefaultSound(String type, String message) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
         'your channel id', 'your channel name', 'your channel description',
         importance: Importance.Max, priority: Priority.High);
@@ -110,23 +110,31 @@ class _AppUserContainerState extends State<AppUserContainer> {
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
       0,
-      'New Post',
-      'How to Show Notification in Flutter',
+      type,
+      message,
       platformChannelSpecifics,
       payload: 'Default_Sound',
     );
   }
 
   _onReceptionOfMessageFromServer(message){
-    showNotificationWithDefaultSound();
+    var json = jsonDecode(message);
+
+
+    if(json["Data"]["server"]=="follow you"){
+      String msg = json["Data"]["token"] + " started to follow you!";
+      showNotificationWithDefaultSound("New Follower", msg);
+    }
+    else{
+      showNotificationWithDefaultSound("Type", "MESSAGE");
+
+    }
     print(message);
 
   }
   void startWebSocket(String cookie){
     var login = '{ "Type": "login", "Data": { "token": "'+cookie+'", "server": "172.22.0.4" } }';
     channel.sink.add(login);
-    var message = '{ "Type": "publish", "Data": { "to": "'+3.toString()+'", "text": "oi gatinho" } }';
-    channel.sink.add(message);
 
   }
 

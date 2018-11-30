@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:roadini/models/plan_route.dart';
 import 'package:roadini/util/person_header.dart';
+import 'package:roadini/models/app_location.dart';
+import 'package:roadini/models/user_app.dart';
+import 'package:dio/dio.dart';
 
 class PlanRoutePage extends StatefulWidget{
   _PlanRoutePage createState() => _PlanRoutePage();
@@ -359,7 +362,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
                     "Save Route",
                     style: new TextStyle(fontSize: 20.0, color: Colors.white),
                   ),
-                  onPressed: () {},
+                  onPressed: () {_addToFeed();},
                 ),
               ),
             ],
@@ -377,6 +380,41 @@ class _PlanRoutePage extends State<PlanRoutePage>{
       ],);
     }
 
+
+  }
+  _addToFeed(){
+    print(listPlan);
+    final container = AppLocationContainer.of(context);
+    print(container.getStartLocation().latitude);
+    String url = "https://maps.googleapis.com/maps/api/staticmap?center="+ container.getStartLocation().latitude.toString() + "," + container.getStartLocation().longitude.toString() + "&zoom=12&size=300x150&maptype=roadmap";
+    String placesIds = "";
+    for(PlanRoute p in listPlan){
+      url += "&markers=" + p.lat.toString() + "," + p.lng.toString();
+      placesIds += (p.placeId) + ",";
+    }
+    url += "&key=AIzaSyAKzTjJcIZKZDs2-ZD3B1njQl2mN3Tu5l8";
+    final containerU = AppUserContainer.of(context);
+    int id = containerU.getUser().userId;
+    print(placesIds);
+
+    Dio dio = new Dio();
+    FormData formData = new FormData(); // just like JS
+    formData.add('urlStatic' ,url);
+    formData.add('localsIds' ,placesIds);
+    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/saveRoute/" + id.toString(), data: formData, options: Options(
+        method: 'POST',
+        responseType: ResponseType.PLAIN // or ResponseType.JSON
+    ))
+        .then((response) => _handleResponse(response))
+        .catchError((error) => print(error));
+
+
+  }
+  _handleResponse(response){
+
+    if(response.statusCode==200){
+      print("OK");
+    }
 
   }
 

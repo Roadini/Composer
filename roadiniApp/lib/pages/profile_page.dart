@@ -73,9 +73,9 @@ class _ProfilePage extends State<ProfilePage> {
   followUser() async {
     print('following user');
     String result;
+    final container = AppUserContainer.of(context);
+    int personalId = container.getUser().userId;
     try {
-      final container = AppUserContainer.of(context);
-      int personalId = container.getUser().userId;
 
       var httpClient = new HttpClient();
       var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/follow/" +personalId.toString() +"/" +id.toString()));
@@ -92,6 +92,8 @@ class _ProfilePage extends State<ProfilePage> {
       result = 'Failed invoking the getFeed function. Exception: $exception';
     }
 
+    var message = '{ "Type": "publish", "Data": { "to": "'+id.toString()+'", "text": "follow you" } }';
+    container.channel.sink.add(message);
     setState(() {
       this.isFollowing = true;
       this.followButtonClicked = true;
@@ -136,7 +138,6 @@ class _ProfilePage extends State<ProfilePage> {
 
     final container = AppUserContainer.of(context);
     int personalId = container.getUser().userId;
-    container.showNotificationWithDefaultSound();
 
     //FOLLOW BUTTON
     Container buildFollowButton(
