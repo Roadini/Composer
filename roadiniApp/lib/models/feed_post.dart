@@ -9,14 +9,16 @@ class FeedPost extends StatefulWidget{
         this.description,
         this.postId,
         this.ownerId,
-        this.urlImage});
+        this.urlImage,
+        this.photo});
 
   final String username;
   final String location;
   final String description;
-  final String postId;
-  final String ownerId;
+  final int postId;
+  final int ownerId;
   final String urlImage;
+  final String photo;
 
   factory FeedPost.fromJSON(Map parsedJson){
     return new FeedPost(
@@ -26,6 +28,7 @@ class FeedPost extends StatefulWidget{
       postId : parsedJson['postId'],
       ownerId : parsedJson['ownerId'],
       urlImage : parsedJson['urlImage'],
+      photo : parsedJson['photo'],
     );
   }
 
@@ -37,6 +40,7 @@ class FeedPost extends StatefulWidget{
     postId : this.postId,
     ownerId : this.ownerId,
     urlImage : this.urlImage,
+    photo : this.photo,
 
   );
 
@@ -46,9 +50,10 @@ class _FeedPost extends State<FeedPost>{
   final String username;
   final String location;
   final String description;
-  final String postId;
-  final String ownerId;
+  final int postId;
+  final int ownerId;
   final String urlImage;
+  final String photo;
 
   _FeedPost(
       { this.username,
@@ -56,7 +61,9 @@ class _FeedPost extends State<FeedPost>{
         this.description,
         this.postId,
         this.ownerId,
-        this.urlImage});
+        this.urlImage,
+        this.photo,
+      });
 
   bool stared = false;
   int starsCount = 0;
@@ -115,7 +122,7 @@ class _FeedPost extends State<FeedPost>{
                       shape: BoxShape.circle,
                       image: DecorationImage(
                           fit: BoxFit.fill,
-                          image: NetworkImage('$urlImage'))
+                          image: NetworkImage(photo))
                   ),
                 ),
               ),
@@ -162,7 +169,7 @@ class _FeedPost extends State<FeedPost>{
               padding: new EdgeInsets.only(left: 16.0, bottom: 8.0, right: 16.0),
               decoration: new BoxDecoration(
                 image: new DecorationImage(
-                    image: new AssetImage('assets/route.jpeg'),
+                    image: new NetworkImage(urlImage),
                     fit: BoxFit.cover
                 ),
               ),

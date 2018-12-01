@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:roadini/models/feed_post.dart';
 import 'package:roadini/util/person_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:roadini/models/user_app.dart';
 
 
 class FeedPage extends StatefulWidget{
@@ -69,8 +70,11 @@ class _FeedPage extends State<FeedPage>{
 
       listPosts = _generateFeed(jsonResponse);*/
 
+      final container = AppUserContainer.of(context);
+      int personalId = container.getUser().userId;
+
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/feed"));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/feed/" + personalId.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
