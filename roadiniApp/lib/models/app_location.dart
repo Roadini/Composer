@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:location/location.dart' as l;
 import 'package:map_view/map_view.dart';
 //import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
+
 
 class AppLocation{
   bool tracking;
@@ -34,6 +36,7 @@ class AppLocationContainer extends StatefulWidget {
   // so it has to have a child!
   final Widget child;
 
+
   AppLocationContainer({
     @required this.child,
     this.state,
@@ -56,23 +59,83 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
   // Just padding the state through so we don't have to
   // manipulate it with widget.state.
   AppLocation state;
+  bool isPermissionCoarse = false;
+  bool isPermissionFine = false;
+  bool isPermissionAlways = false;
+  bool isPermissionInUse = false;
 
   getPermission(_location) async{
-    /*PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
-    PermissionStatus permission1 = await PermissionHandler().checkPermissionStatus(PermissionGroup.locationAlways);
-    PermissionStatus permission2 = await PermissionHandler().checkPermissionStatus(PermissionGroup.locationWhenInUse);
+    String finish = await updatePermission();
+    print(finish);
 
-    print(permission);
-    print(permission1);
-    print(permission2);*/
+  }
+  updatePermission() async {
+    Permission permissionCoarse = Permission.AccessCoarseLocation;
+    Permission permissionFine = Permission.AccessFineLocation;
+    Permission permissionAlways = Permission.AlwaysLocation;
+    Permission permissionWhenInUse = Permission.WhenInUseLocation;
+    print("ETROU AQUI permission");
 
-    /*Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.location, PermissionGroup.locationWhenInUse, PermissionGroup.locationAlways]);
-    permissions.forEach((k,v) => (){
-      print(k);
-      print(v);
 
-    });*/
 
+    if (await SimplePermissions.checkPermission(permissionFine)) {
+      isPermissionFine = true;
+      print("Pos a true");
+    } else {
+      print("REQUEST FINE");
+      await SimplePermissions.requestPermission(permissionFine);
+      print("Disse que sim");
+      if (await SimplePermissions.checkPermission(permissionFine)) {
+        isPermissionFine = true;
+
+      } else {
+        isPermissionFine = false;
+      }
+    }
+
+    if (await SimplePermissions.checkPermission(permissionCoarse)) {
+      isPermissionCoarse = true;
+      print("Pos a true");
+    } else {
+      print("REQUEST COARSE");
+      await SimplePermissions.requestPermission(permissionCoarse);
+      print("Disse que sim");
+      if (await SimplePermissions.checkPermission(permissionCoarse)) {
+        isPermissionCoarse = true;
+
+      } else {
+        isPermissionCoarse = false;
+      }
+    }
+
+    if (await SimplePermissions.checkPermission(permissionAlways)) {
+      isPermissionAlways = true;
+      print("Pos a true");
+    } else {
+      if (await SimplePermissions.requestPermission(permissionAlways)==true) {
+        isPermissionAlways = true;
+
+      } else {
+        isPermissionAlways = false;
+      }
+    }
+
+    if (await SimplePermissions.checkPermission(permissionWhenInUse)) {
+      isPermissionInUse = true;
+      print("Pos a true");
+    } else {
+      if (await SimplePermissions.requestPermission(permissionWhenInUse)==true) {
+        isPermissionInUse = true;
+
+      } else {
+        isPermissionInUse = false;
+      }
+    }
+    print("Bluetooth coarse location granted???  $isPermissionCoarse");
+    print("Bluetooth fine location granted???  $isPermissionFine");
+    print("Bluetooth always location granted???  $isPermissionAlways");
+    print("Bluetooth in use location granted???  $isPermissionInUse");
+    return "finish";
   }
 
   void create(){
@@ -136,6 +199,7 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
 
   initPlatformState() async {
     var permission = await getPermission(this.state._location);
+    print("INIT PLATFORM");
     print(permission);
 
     Map<String, double> location;
@@ -155,20 +219,35 @@ class _AppLocationContainerState extends State<AppLocationContainer> {
         error = 'Permission denied - please ask the user to enable it from the app settings';
       }
 
+      print("DENIE PERMISSION????");
+      print(e);
+      print(e.code);
+      print(error);
+      print(_permission);
+
       location = null;
     }
 
-    state._startLocation = location;
-    state.locations.add(new Location(state._startLocation["latitude"], state._startLocation["longitude"]));
-    //cameraPosition = new CameraPosition(new Location(_startLocation["latitude"], _startLocation["longitude"]), 16.0);
-    Marker m = new Marker("0", "Starting Point", state._startLocation["latitude"],state._startLocation["longitude"]);
-    state.markers.add(m);
     print("INIT");
+    state._startLocation = location;
+    if(location != null){
+
+      state.locations.add(new Location(state._startLocation["latitude"], state._startLocation["longitude"]));
+      Marker m = new Marker("0", "Starting Point", state._startLocation["latitude"],state._startLocation["longitude"]);
+      state.markers.add(m);
+
+    }
     return location;
   }
   startStream() async{
     state._locationSubscription =
         state._location.onLocationChanged().listen((Map<String,double> result) {
+          if(state._startLocation == null){
+            state._startLocation = result;
+            state.locations.add(new Location(state._startLocation["latitude"], state._startLocation["longitude"]));
+            Marker m = new Marker("0", "Starting Point", state._startLocation["latitude"],state._startLocation["longitude"]);
+            state.markers.add(m);
+          }
           if(state.tracking) {
             print(result);
             state._currentLocation = result;

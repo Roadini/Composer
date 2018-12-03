@@ -103,7 +103,7 @@ class _PersonalLists extends State<PersonalLists> {
                   list.add(
                       new Column(children: <Widget>[
                         new Container(
-                          margin: const EdgeInsets.all(10.0),
+                          margin: const EdgeInsets.all(2.0),
                           child: new Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
@@ -149,7 +149,7 @@ class _PersonalLists extends State<PersonalLists> {
                   list.add(
                       new Column(children: <Widget>[
                         new Container(
-                          margin: const EdgeInsets.all(10.0),
+                          margin: const EdgeInsets.all(2.0),
                           child: new Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,

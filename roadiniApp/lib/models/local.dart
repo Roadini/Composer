@@ -146,13 +146,9 @@ class _Local extends State<Local>{
  }
  _addItemToList(int key, String value, context2) async{
    String result;
-   print(key);
-   print(value);
-   print(this.primaryType);
-   print(this.name);
 
    try {
-     var data = {'listId': key.toString(), 'userId':1.toString(), 'itemId':this.id.toString(), 'review':_review.text};
+     var data = {'listId': key.toString(), 'userId':1.toString(), 'itemId':this.id.toString(), 'review':_review.text, 'listName':value};
      _review.text = "";
      http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/addItem", body:data);
      print(response);

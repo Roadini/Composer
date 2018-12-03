@@ -65,12 +65,14 @@ class _AppUserContainerState extends State<AppUserContainer> {
         this.channel.stream.listen(
             _onReceptionOfMessageFromServer,
             onError: (error, StackTrace stackTrace){
+              print("WS ERROR");
               print(error);
               // error handling
             },
             onDone: (){
               // communication has been closed
-              print("FECCHOU");
+              print("WS CLOSE");
+              print("FECHOU");
             }
         );
         startWebSocket(cookie);
@@ -126,6 +128,7 @@ class _AppUserContainerState extends State<AppUserContainer> {
       showNotificationWithDefaultSound("New Follower", msg);
     }
     else{
+      print("MESSAGE DIFFERENT");
       showNotificationWithDefaultSound("Type", "MESSAGE");
 
     }
