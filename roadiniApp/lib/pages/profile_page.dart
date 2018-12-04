@@ -9,6 +9,8 @@ import 'package:roadini/models/profile_fields.dart';
 import 'package:roadini/util/profile_column.dart';
 import 'package:roadini/models/user_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 
 class ProfilePage extends StatefulWidget{
 
@@ -53,7 +55,7 @@ class _ProfilePage extends State<ProfilePage> {
         for(var l in jsonResponse["following"]){
           following.add(l["id"]);
         }
-        user = ProfileFields.fromVars(jsonResponse["name"], followers, id, following, id, jsonResponse["description"], "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ");
+        user = ProfileFields.fromVars(jsonResponse["name"], followers, id, following, id, jsonResponse["description"], jsonResponse["urlImage"]);
       } else {
         result =
         'Error getting a feed:\nHttp status ${response.statusCode}';
@@ -67,7 +69,28 @@ class _ProfilePage extends State<ProfilePage> {
     return user;
   }
 
-  editProfile() {
+  logout() async{
+
+    String result;
+    try {
+
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/logout/" + this.id.toString()));
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.ok) {
+        String json = await response.transform(utf8.decoder).join();
+        var jsonResponse = jsonDecode(json);
+        print(jsonResponse);
+        if(jsonResponse["status"]==true){
+          exit(0);
+        }
+      } else {
+        result = 'Error getting a feed:\nHttp status ${response.statusCode}';
+      }
+    } catch (exception) {
+      result = 'Failed invoking the getFeed function. Exception: $exception';
+    }
+
   }
 
   followUser() async {
@@ -170,11 +193,11 @@ class _ProfilePage extends State<ProfilePage> {
       // viewing your own profile - should show edit button
       if (user.id == personalId) {
         return buildFollowButton(
-          text: "Edit Profile",
-          backGroundColor: Colors.white,
+          text: "Logout",
+          backGroundColor: Colors.grey,
           textColor: Colors.black,
           borderColor: Colors.grey,
-          function: editProfile,
+          function: logout,
         );
       }
 
@@ -206,6 +229,52 @@ class _ProfilePage extends State<ProfilePage> {
           textColor: Colors.black,
           borderColor: Colors.grey);
     }
+    _handleResponse(response, context){
+
+      if(response.statusCode == 200) {
+
+        Navigator.of(context).pop();
+        setState(() {
+        });
+      }
+    }
+
+    _dialogOptions(File file){
+      return showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return new AlertDialog(
+              title: Text("Do you wanna update your photo"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Yes'),
+                  onPressed: () {
+                    final container = AppUserContainer.of(context);
+                    Dio dio = new Dio();
+                    FormData formdata = new FormData(); // just like JS
+                    formdata.add("photos", new UploadFileInfo(file, "fileUpload.jpeg"));
+                    formdata.add('userId' ,container.getUser().userId.toString());
+                    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/editImage", data: formdata, options: Options(
+                        method: 'POST',
+                        responseType: ResponseType.PLAIN // or ResponseType.JSON
+                    ))
+                        .then((response) => _handleResponse(response, context))
+                        .catchError((error) => print(error));
+                  },
+                ),
+                FlatButton(
+                  child: Text('No'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          }
+
+      );
+    }
     //final container = AppUserContainer.of(context);
     return new FutureBuilder(
         future: _getUser(this.id),
@@ -225,10 +294,10 @@ class _ProfilePage extends State<ProfilePage> {
           }
 
           return new Scaffold(
-              appBar: new AppBar(title: new Text(
+              appBar: new AppBar(title: new Center(child: new Text(
                 userProfile.name,
                 style: const TextStyle(color: Colors.black),
-              ),
+              ),),
                 backgroundColor: Colors.white,
               ),
 
@@ -244,7 +313,15 @@ class _ProfilePage extends State<ProfilePage> {
                             new CircleAvatar(
                               radius:40.0,
                               backgroundColor: Colors.grey,
-                              backgroundImage: new NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ"),
+                              backgroundImage: new NetworkImage(userProfile.urlImage),
+                              child: InkWell(
+                                onTap: ()async{
+                                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera, maxHeight: 500, maxWidth: 500, );
+                                  _dialogOptions(imageFile);
+                                  print("TAPPED");
+                                },
+                              ),
+
                             ),
                             new Expanded(
                                 flex:1,

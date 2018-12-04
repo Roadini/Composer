@@ -57,8 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
           print("onStateChanged: ${state.type} ${state.url}");
           final cookiesString = await flutterWebViewPlugin.evalJavascript("document.cookie");
           print("COOKIE");
+          print(cookiesString);
           print(cookiesString.runtimeType);
           var cookie = jsonDecode(cookiesString);
+          print(cookie);
           print(cookie.runtimeType);
 
           if(cookie != "null" && cookie != "" && cookie != null){

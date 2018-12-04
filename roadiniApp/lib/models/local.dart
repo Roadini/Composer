@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:roadini/models/user_app.dart';
 
 class Local extends StatefulWidget{
 
@@ -124,9 +125,9 @@ class _Local extends State<Local>{
    Map<int,String> lists = new Map();
    try {
      SharedPreferences prefs = await SharedPreferences.getInstance();
+     final container = AppUserContainer.of(context);
 
-     int user_id = 1;
-     String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + user_id.toString();
+     String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + container.getUser().userId.toString();
      http.Response response = await http.get(url);
      if (response.statusCode == HttpStatus.ok) {
        var jsonResponse = jsonDecode(response.body);
@@ -148,7 +149,8 @@ class _Local extends State<Local>{
    String result;
 
    try {
-     var data = {'listId': key.toString(), 'userId':1.toString(), 'itemId':this.id.toString(), 'review':_review.text, 'listName':value};
+     final container = AppUserContainer.of(context);
+     var data = {'listId': key.toString(), 'userId':container.getUser().userId.toString(), 'itemId':this.id.toString(), 'review':_review.text, 'listName':value};
      _review.text = "";
      http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/addItem", body:data);
      print(response);

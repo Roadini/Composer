@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
+import 'package:roadini/models/user_app.dart';
 
 
 
@@ -31,6 +32,7 @@ class _UploadPage extends State<UploadPage>{
   List<Local> listPlaces;
   List<LocalImage> listPlacesImage;
   TextEditingController _review;
+  String photoDescription;
 
 
   @override
@@ -80,7 +82,8 @@ class _UploadPage extends State<UploadPage>{
                 child: const Text("Discover Monument"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
+                  File imageFile = await ImagePicker.pickImage(source: ImageSource.camera,  maxHeight: 500, maxWidth: 500);
+                  newPage2(imageFile, context2);
                 },
               )
             ],
@@ -90,8 +93,6 @@ class _UploadPage extends State<UploadPage>{
         }
 
     );
-
-
   }
   _buttonTracking(container){
     if(!container.getTracking()){
@@ -172,14 +173,13 @@ class _UploadPage extends State<UploadPage>{
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      /*String jsonString = await _loadJsonAsset();
-      var jsonResponse = jsonDecode(jsonString);
-      print(jsonResponse);
 
-      listPosts = _generateFeed(jsonResponse);*/
+      final container = AppLocationContainer.of(context);
+      String lat = container.getStartLocation().latitude.toString();
+      String lng = container.getStartLocation().longitude.toString();
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/nearPlaces"));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/nearPlaces/"+lat+"/"+lng));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -322,9 +322,9 @@ class _UploadPage extends State<UploadPage>{
     Map<int,String> lists = new Map();
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      final container = AppUserContainer.of(context);
 
-      int user_id = 1;
-      String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + user_id.toString();
+      String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + container.getUser().userId.toString();
       http.Response response = await http.get(url);
       if (response.statusCode == HttpStatus.ok) {
         var jsonResponse = jsonDecode(response.body);
@@ -343,6 +343,8 @@ class _UploadPage extends State<UploadPage>{
     _dialogOptionsList(lists, contextIndex, localImage, file);
   }
   _handleResponse(response, contextDialog, contextIndex){
+    print(response.statusCode);
+    print(response.data);
     if(response.statusCode==200){
       var jsonResponse = jsonDecode(response.data);
       if(jsonResponse["status"]==true){
@@ -353,11 +355,12 @@ class _UploadPage extends State<UploadPage>{
 
   }
   _addItemToList(int key, String value, contextDialog, contextIndex, localImage, File file) async{
+    final container = AppUserContainer.of(context);
     Dio dio = new Dio();
     FormData formdata = new FormData(); // just like JS
     formdata.add("photos", new UploadFileInfo(file, "fileUpload.jpeg"));
     formdata.add('listId' ,key.toString());
-    formdata.add('userId' ,1.toString());
+    formdata.add('userId' ,container.getUser().userId.toString());
     formdata.add('itemId' ,localImage.id.toString());
     formdata.add('review' ,_review.text);
     dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/postImage", data: formdata, options: Options(
@@ -487,6 +490,104 @@ class _UploadPage extends State<UploadPage>{
     );
   }
 
+  _verify(file){
+    _discover(file);
+
+    if(photoDescription != null) {
+      return new Column( children: <Widget>[new Text(photoDescription)]);
+    }else{
+      return new Column(
+        children: <Widget>[
+          new Text("Loading Photo", style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          new Container(
+              alignment: FractionalOffset.center,
+              child: new CircularProgressIndicator())
+        ],
+      );
+    }
+  }
+
+  newPage2(file, context){
+    _discover(file);
+
+    Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context2) {
+      return new Center(
+          child: new Scaffold(
+              appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: Center(
+                      child: Text("Discover Place")
+                  )
+              ),
+              body:new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 300.0,
+                      //width: 250.0,
+                      decoration: new BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          image: DecorationImage(
+                              fit: BoxFit.contain,
+                              image: FileImage(file))
+                      ),
+                    ),
+                    //new RefreshIndicator(child: _verify(file), onRefresh: _refresh),
+                  ]
+              )
+          )
+      );
+    })
+    );
+  }
+  _discover(File file){
+    print("post image");
+    final container = AppUserContainer.of(context);
+    Dio dio = new Dio();
+    FormData formdata = new FormData(); // just like JS
+    formdata.add("photos", new UploadFileInfo(file, "fileUpload.jpeg"));
+    formdata.add('userId' ,container.getUser().userId.toString());
+    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/discoverPlace", data: formdata, options: Options(
+        method: 'POST',
+        responseType: ResponseType.PLAIN // or ResponseType.JSON
+    ))
+        .then((response) => _handleResponse2(response))
+        .catchError((error) => print(error));
+
+
+  }
+  _handleResponse2(response){
+    print(response.statusCode);
+    var jsonResponse = jsonDecode(response.data);
+    print(jsonResponse["label"]);
+//    photoDescription = response.statusCode;
+    if(response.statusCode == 200){
+      return showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return new AlertDialog(
+              title: new Text(jsonResponse["label"]),
+              content: new Text(jsonResponse["extract"]),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+
+                  },
+                ),
+              ],
+            );
+          }
+
+      );
+
+    }
+
+  }
+
   showMap(container) {
     var last = container.getLocation();
 
@@ -576,69 +677,6 @@ class _UploadPage extends State<UploadPage>{
     mapView.dismiss();
     compositeSubscription.cancel();
   }
-/*
-  @override
-  Widget build(BuildContext context) {
-    if(file == null && prompted == false) {
-      Future.delayed(Duration.zero, ()=> _dialogOptions());
-    }
-    return file == null
-        ? new Column(children: <Widget>[
-      new PersonHeader(),
-      new IconButton(icon: new Icon(Icons.file_upload), onPressed: _dialogOptions),
-
-    ],)
-        : new Scaffold(
-      resizeToAvoidBottomPadding: false,
-      body: new ListView(children: <Widget>[
-        new Card(
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              PersonHeader(),
-              Divider(),
-              new Center(
-                child : new Container(
-                  height: 300.0,
-                  width: 250.0,
-                  decoration: new BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      image: DecorationImage(
-                          fit: BoxFit.contain,
-                          image: FileImage(file))
-                  ),
-                ),
-              ),
-              new Container(
-                padding: EdgeInsets.all(10.0),
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    new Center(
-                      child: new Text('Photo Title',
-                        style: TextStyle(fontSize: 20.0),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    new Padding(
-                      padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
-                      child: new Text('Situado na Praia da Barra, o O Barba Azul apresenta um ambiente jovem, luminoso e descontraído, na avenida em frente ao farol da Barra. Fundado em 2015.',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 5,) ,
-                    ),
-                  ],
-                ),
-              ),
-
-
-            ],),)
-      ],),
-    );
-  }*/
-
-
   //Line
   List<Polyline> _lines = <Polyline>[
     new Polyline(

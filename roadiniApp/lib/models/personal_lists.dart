@@ -275,7 +275,10 @@ class _PersonalLists extends State<PersonalLists> {
     ListFields newList;
 
     try {
-      var data = {'name': name};
+      final container = AppUserContainer.of(context);
+
+
+      var data = {'name': name, 'user_id': container.getUser().userId.toString()};
       print(data.toString());
       http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/createList", body:data);
       print(response);
@@ -291,7 +294,7 @@ class _PersonalLists extends State<PersonalLists> {
         }
       } else {
         result =
-        'Error getting a feed:\nHttp status ${response.statusCode}';
+        'Error getting a :\nHttp status ${response.statusCode}';
       }
     } catch (exception) {
       result = 'Failed invoking the getFeed function. Exception: $exception';
