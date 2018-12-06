@@ -151,18 +151,6 @@ class _FeedPost extends State<FeedPost>{
           ),
           new Column(children: <Widget>[
             new Container(
-              padding: EdgeInsets.all(10.0),
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new Text('$description',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,)
-                ],
-              ),
-            ),
-            new Container(
               constraints: new BoxConstraints.expand(
                 height: 200.0,
               ),
@@ -182,6 +170,18 @@ class _FeedPost extends State<FeedPost>{
 
             ],
           ),*/
+            ),
+            new Container(
+              padding: EdgeInsets.all(10.0),
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  new Text('$description',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,)
+                ],
+              ),
             ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.start,

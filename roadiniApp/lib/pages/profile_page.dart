@@ -41,7 +41,7 @@ class _ProfilePage extends State<ProfilePage> {
       int personalId = container.getUser().userId;
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/userInfo/" +personalId.toString() +"/" +id.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/userInfo/" +personalId.toString() +"/" +id.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -75,7 +75,7 @@ class _ProfilePage extends State<ProfilePage> {
     try {
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/logout/" + this.id.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/logout/" + this.id.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -101,7 +101,7 @@ class _ProfilePage extends State<ProfilePage> {
     try {
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/follow/" +personalId.toString() +"/" +id.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/follow/" +personalId.toString() +"/" +id.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -134,7 +134,7 @@ class _ProfilePage extends State<ProfilePage> {
       int personalId = container.getUser().userId;
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/unfollow/" +personalId.toString() +"/" +id.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/unfollow/" +personalId.toString() +"/" +id.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -255,7 +255,7 @@ class _ProfilePage extends State<ProfilePage> {
                     FormData formdata = new FormData(); // just like JS
                     formdata.add("photos", new UploadFileInfo(file, "fileUpload.jpeg"));
                     formdata.add('userId' ,container.getUser().userId.toString());
-                    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/editImage", data: formdata, options: Options(
+                    dio.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/editImage", data: formdata, options: Options(
                         method: 'POST',
                         responseType: ResponseType.PLAIN // or ResponseType.JSON
                     ))
@@ -294,7 +294,10 @@ class _ProfilePage extends State<ProfilePage> {
           }
 
           return new Scaffold(
-              appBar: new AppBar(title: new Center(child: new Text(
+
+              appBar: new AppBar(
+                automaticallyImplyLeading: false,
+                title: new Center(child: new Text(
                 userProfile.name,
                 style: const TextStyle(color: Colors.black),
               ),),

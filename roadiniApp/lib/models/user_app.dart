@@ -60,7 +60,7 @@ class _AppUserContainerState extends State<AppUserContainer> {
     if(user == null) {
       user = new AppUser(name, userId, email, age, description, male);
       try{
-        this.channel = new IOWebSocketChannel.connect("ws://engserv-1-aulas.ws.atnog.av.it.pt/ws");
+        this.channel = new IOWebSocketChannel.connect("ws://engserv1-aulas.ws.atnog.av.it.pt/ws");
 
         this.channel.stream.listen(
             _onReceptionOfMessageFromServer,

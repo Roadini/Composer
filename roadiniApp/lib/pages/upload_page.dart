@@ -169,7 +169,6 @@ class _UploadPage extends State<UploadPage>{
     String result;
     List<Local> listPlacesTmp;
     List<LocalImage> listPlacesTmp2;
-    print("_GETPLACES");
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -179,7 +178,7 @@ class _UploadPage extends State<UploadPage>{
       String lng = container.getStartLocation().longitude.toString();
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/nearPlaces/"+lat+"/"+lng));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/nearPlaces/"+lat+"/"+lng));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -324,7 +323,7 @@ class _UploadPage extends State<UploadPage>{
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final container = AppUserContainer.of(context);
 
-      String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + container.getUser().userId.toString();
+      String url = "http://engserv1-aulas.ws.atnog.av.it.pt/roadini/listName/" + container.getUser().userId.toString();
       http.Response response = await http.get(url);
       if (response.statusCode == HttpStatus.ok) {
         var jsonResponse = jsonDecode(response.body);
@@ -363,7 +362,7 @@ class _UploadPage extends State<UploadPage>{
     formdata.add('userId' ,container.getUser().userId.toString());
     formdata.add('itemId' ,localImage.id.toString());
     formdata.add('review' ,_review.text);
-    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/postImage", data: formdata, options: Options(
+    dio.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/postImage", data: formdata, options: Options(
         method: 'POST',
         responseType: ResponseType.PLAIN // or ResponseType.JSON
     ))
@@ -547,7 +546,7 @@ class _UploadPage extends State<UploadPage>{
     FormData formdata = new FormData(); // just like JS
     formdata.add("photos", new UploadFileInfo(file, "fileUpload.jpeg"));
     formdata.add('userId' ,container.getUser().userId.toString());
-    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/discoverPlace", data: formdata, options: Options(
+    dio.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/discoverPlace", data: formdata, options: Options(
         method: 'POST',
         responseType: ResponseType.PLAIN // or ResponseType.JSON
     ))
@@ -562,6 +561,7 @@ class _UploadPage extends State<UploadPage>{
     print(jsonResponse["label"]);
 //    photoDescription = response.statusCode;
     if(response.statusCode == 200){
+      if(jsonResponse["status"]==true){
       return showDialog(
           context: context,
           barrierDismissible: false,
@@ -584,6 +584,31 @@ class _UploadPage extends State<UploadPage>{
 
       );
 
+    }
+    else{
+        return showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return new AlertDialog(
+                title: new Text("Error"),
+                content: new Text("Could not find this image try again"),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+
+                    },
+                  ),
+                ],
+              );
+            }
+
+        );
+
+      }
     }
 
   }

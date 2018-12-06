@@ -127,7 +127,7 @@ class _Local extends State<Local>{
      SharedPreferences prefs = await SharedPreferences.getInstance();
      final container = AppUserContainer.of(context);
 
-     String url = "http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/listName/" + container.getUser().userId.toString();
+     String url = "http://engserv1-aulas.ws.atnog.av.it.pt/roadini/listName/" + container.getUser().userId.toString();
      http.Response response = await http.get(url);
      if (response.statusCode == HttpStatus.ok) {
        var jsonResponse = jsonDecode(response.body);
@@ -152,7 +152,7 @@ class _Local extends State<Local>{
      final container = AppUserContainer.of(context);
      var data = {'listId': key.toString(), 'userId':container.getUser().userId.toString(), 'itemId':this.id.toString(), 'review':_review.text, 'listName':value};
      _review.text = "";
-     http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/addItem", body:data);
+     http.Response response = await http.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/addItem", body:data);
      print(response);
      var json_response = jsonDecode(response.body);
      if (response.statusCode == HttpStatus.ok) {

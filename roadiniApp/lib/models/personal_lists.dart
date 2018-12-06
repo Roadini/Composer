@@ -58,7 +58,7 @@ class _PersonalLists extends State<PersonalLists> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/ownLists/" + this.userId.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/ownLists/" + this.userId.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -280,7 +280,7 @@ class _PersonalLists extends State<PersonalLists> {
 
       var data = {'name': name, 'user_id': container.getUser().userId.toString()};
       print(data.toString());
-      http.Response response = await http.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/createList", body:data);
+      http.Response response = await http.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/createList", body:data);
       print(response);
       var json_response = jsonDecode(response.body);
       if (response.statusCode == HttpStatus.ok) {

@@ -26,7 +26,7 @@ class _CardFeedRoutes extends State<CardFeedRoutes>{
       feed = _generateFeedRoutes(jsonResponse);*/
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/personalTrips"));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/personalTrips"));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();

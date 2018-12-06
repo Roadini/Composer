@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:roadini/models/feed_post.dart';
-import 'package:roadini/util/person_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:roadini/models/user_app.dart';
 
@@ -42,10 +40,15 @@ class _FeedPage extends State<FeedPage>{
   buildFeed(){
     if(listFeed != null) {
       return new ListView(children: <Widget>[
-          PersonHeader(),
-          new Column(
-            children: listFeed,
-          )]);
+        new AppBar(title: Center(
+            child: Text("Feed",
+              style: new TextStyle(
+                color: Color.fromRGBO(43, 65, 65, 1.0),
+              ),)
+        ),
+          backgroundColor: Colors.white,),          new Column(
+          children: listFeed,
+        )]);
     }else{
       return new Container(
           alignment: FractionalOffset.center,
@@ -55,7 +58,7 @@ class _FeedPage extends State<FeedPage>{
   }
 
   _loadFeed() async{
-   _getFeed();
+    _getFeed();
   }
   _getFeed() async {
 
@@ -74,7 +77,7 @@ class _FeedPage extends State<FeedPage>{
       int personalId = container.getUser().userId;
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/feed/" + personalId.toString()));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/feed/" + personalId.toString()));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -102,9 +105,4 @@ class _FeedPage extends State<FeedPage>{
     return listPosts;
 
   }
-  Future<String> _loadJsonAsset() async{
-    return await rootBundle.loadString('assets/feed.json');
-  }
-
-
 }

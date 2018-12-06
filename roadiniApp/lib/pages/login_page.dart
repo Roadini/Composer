@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     FormData formData = new FormData(); // just like JS
     formData.add('cookie' ,cookie);
-    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/createUser", data: formData, options: Options(
+    dio.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/createUser", data: formData, options: Options(
         method: 'POST',
         responseType: ResponseType.PLAIN // or ResponseType.JSON
     ))
@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String loginUrl = "http://engserv-1-aulas.ws.atnog.av.it.pt/lobin";
+    String loginUrl = "http://engserv1-aulas.ws.atnog.av.it.pt/lobin";
     this.context = context;
 
     return new WebviewScaffold(

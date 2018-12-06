@@ -14,7 +14,6 @@ class Edit extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return EditState();
   }
 
@@ -33,7 +32,6 @@ class EditState extends State<Edit> {
   }
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     if(firstTime == false){
       _getListCategory();
       firstTime = true;
@@ -103,7 +101,7 @@ class EditState extends State<Edit> {
 
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/changeMagic/"+lat+"/"+lng+"/"+widget.placeId ));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/changeMagic/"+lat+"/"+lng+"/"+widget.placeId ));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();

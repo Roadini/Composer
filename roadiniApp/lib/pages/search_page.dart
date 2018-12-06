@@ -56,7 +56,7 @@ class _SearchPage extends State<SearchPage> {
       int id = container.getUser().userId;
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/search/" + id.toString() + "/" + searchValue));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/search/" + id.toString() + "/" + searchValue));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
@@ -71,7 +71,7 @@ class _SearchPage extends State<SearchPage> {
           for(var l in x["following"]){
             following.add(l["id"]);
           }
-          user = ProfileFields.fromVars(x["name"], followers, x["id"], following, x["id"], x["description"], "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-RKT_MyU2F4V6i3z2TIZ2Y_VNP3u7tkrPJvpQH5kFuj5-7XEiQ");
+          user = ProfileFields.fromVars(x["name"], followers, x["id"], following, x["id"], x["description"], x["image"]);
           print(user.toString());
           list.add(user);
 

@@ -274,7 +274,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     FormData formData = new FormData(); // just like JS
     formData.add('urlStatic' ,url);
     formData.add('localsIds' ,placesIds);
-    dio.post("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/saveRoute/" + id.toString(), data: formData, options: Options(
+    dio.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/saveRoute/" + id.toString(), data: formData, options: Options(
         method: 'POST',
         responseType: ResponseType.PLAIN // or ResponseType.JSON
     ))
@@ -308,7 +308,7 @@ class _PlanRoutePage extends State<PlanRoutePage>{
 
 
       var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse("http://engserv-1-aulas.ws.atnog.av.it.pt/roadini/magicRoute/"+user_id+"/"+lat+"/"+lng ));
+      var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/magicRoute/"+user_id+"/"+lat+"/"+lng ));
       var response = await request.close();
       if (response.statusCode == HttpStatus.ok) {
         String json = await response.transform(utf8.decoder).join();
