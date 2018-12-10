@@ -54,19 +54,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
     _onStateChanged =
         flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) async{
-          print("onStateChanged: ${state.type} ${state.url}");
-          final cookiesString = await flutterWebViewPlugin.evalJavascript("document.cookie");
-          print("COOKIE");
-          print(cookiesString);
-          print(cookiesString.runtimeType);
-          var cookie = jsonDecode(cookiesString);
-          print(cookie);
-          print(cookie.runtimeType);
 
-          if(cookie != "null" && cookie != "" && cookie != null){
+          print(state.url);
+          if(state.url == "https://engserv1-aulas.ws.atnog.av.it.pt/lobin"){
+            print("onStateChanged: ${state.type} ${state.url}");
+            final cookiesString = await flutterWebViewPlugin.evalJavascript("document.cookie");
+            print("COOKIE");
+            print(cookiesString);
+            print(cookiesString.runtimeType);
+            var cookie = jsonDecode(cookiesString);
             print(cookie);
-            await getInfo(cookie);
+            print(cookie.runtimeType);
 
+            if(cookie != "null" && cookie != "" && cookie != null){
+              print(cookie);
+              await getInfo(cookie);
+
+            }
           }
         });
 
@@ -112,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String loginUrl = "http://engserv1-aulas.ws.atnog.av.it.pt/lobin";
+    String loginUrl = "https://engserv1-aulas.ws.atnog.av.it.pt/lobin";
     this.context = context;
 
     return new WebviewScaffold(

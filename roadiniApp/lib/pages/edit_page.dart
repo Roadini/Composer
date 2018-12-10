@@ -95,8 +95,8 @@ class EditState extends State<Edit> {
     String result;
 
     final container = AppLocationContainer.of(context);
-    String lat = container.getStartLocation().latitude.toString();
-    String lng = container.getStartLocation().longitude.toString();
+    String lat = container.getLocation().latitude.toString();
+    String lng = container.getLocation().longitude.toString();
     try {
 
 

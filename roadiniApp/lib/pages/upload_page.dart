@@ -174,9 +174,11 @@ class _UploadPage extends State<UploadPage>{
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       final container = AppLocationContainer.of(context);
-      String lat = container.getStartLocation().latitude.toString();
-      String lng = container.getStartLocation().longitude.toString();
+      String lat = container.getLocation().latitude.toString();
+      String lng = container.getLocation().longitude.toString();
 
+      print(container.getLocation().latitude.toString());
+      print(container.getLocation().longitude.toString());
       var httpClient = new HttpClient();
       var request = await httpClient.getUrl(Uri.parse("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/nearPlaces/"+lat+"/"+lng));
       var response = await request.close();
@@ -361,6 +363,7 @@ class _UploadPage extends State<UploadPage>{
     formdata.add('listId' ,key.toString());
     formdata.add('userId' ,container.getUser().userId.toString());
     formdata.add('itemId' ,localImage.id.toString());
+    formdata.add('listName' ,value);
     formdata.add('review' ,_review.text);
     dio.post("http://engserv1-aulas.ws.atnog.av.it.pt/roadini/postImage", data: formdata, options: Options(
         method: 'POST',

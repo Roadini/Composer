@@ -137,7 +137,7 @@ class _FeedPost extends State<FeedPost>{
                         color: Color.fromRGBO(43, 65, 65, 1.0),
                       ),
                     ),
-                    Text('@ $location',
+                    Text('$location',
                       style: TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 15.0,

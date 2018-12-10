@@ -299,8 +299,8 @@ class _PlanRoutePage extends State<PlanRoutePage>{
     String result ="";
     List<PlanRoute> tmpListPlan;
     final container = AppLocationContainer.of(context);
-    String lat = container.getStartLocation().latitude.toString();
-    String lng = container.getStartLocation().longitude.toString();
+    String lat = container.getLocation().latitude.toString();
+    String lng = container.getLocation().longitude.toString();
 
     final container2 = AppUserContainer.of(context);
     String user_id = container2.getUser().userId.toString();
