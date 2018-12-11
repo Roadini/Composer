@@ -136,7 +136,7 @@ class _AppUserContainerState extends State<AppUserContainer> {
 
   }
   void startWebSocket(String cookie){
-    var login = '{ "Type": "login", "Data": { "token": "'+cookie+'", "server": "172.22.0.4" } }';
+    var login = '{ "Type": "login", "Data": { "token": "'+cookie+'", "server": "172.22.0.2" } }';
     channel.sink.add(login);
 
   }
