@@ -15,6 +15,11 @@ Roadini application developed in Flutter, using authentication service, geoclust
  * Custom photo user
 
 ## Screenshots
+<p>
+<img src="init.gif" width="250">
+<img src="sug.gif" width="250">
+<img src="post.gif" width="250">
+</p>
 
 
 [All application views](https://www.youtube.com/watch?v=npnYk19KACw&feature=youtu.be&fbclid=IwAR1rIURui_20bFpbyiJyUjV0KC6G5DXC6NNN7waxf2qCfKsG6bNxrAe87mE)
