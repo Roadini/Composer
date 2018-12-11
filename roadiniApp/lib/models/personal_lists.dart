@@ -336,6 +336,38 @@ class _PersonalLists extends State<PersonalLists> {
                   child: Image.network(
                       item.urlImage),
                 ),
+                new Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: new Text(
+                        "0 stars",
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromRGBO(43, 65, 65, 1.0),
+                        ),
+
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+                  child:  new Text("Description: ", style:new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  )
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child:  new Text(item.description, style:new TextStyle(
+                    fontSize: 16.0,
+                  )
+                  ),
+                ),
               ],
             )),
       );
